@@ -49,11 +49,11 @@ export function NowPlaying({
   onToggleLike,
 }: NowPlayingProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-full px-4 sm:px-6 py-4 sm:py-8 max-w-lg mx-auto">
+    <div className="flex flex-col items-center justify-center h-full px-4 py-4 sm:px-6 sm:py-6 md:py-8 max-w-md mx-auto">
       {/* Album Art with glow effect */}
-      <div className="w-full max-w-[260px] sm:max-w-[320px] mb-6 relative">
+      <div className="w-full max-w-[200px] xs:max-w-[240px] sm:max-w-[280px] md:max-w-[320px] mb-4 sm:mb-6 relative">
         <div className={cn(
-          "aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl",
+          "aspect-square rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl",
           isPlaying && "player-glow"
         )}>
           <img 
@@ -65,7 +65,7 @@ export function NowPlaying({
       </div>
 
       {/* Audio Equalizer */}
-      <div className="w-full max-w-[280px] sm:max-w-[320px] mb-6">
+      <div className="w-full max-w-[220px] xs:max-w-[260px] sm:max-w-[300px] md:max-w-[320px] mb-4 sm:mb-6">
         <AudioEqualizer 
           audioData={audioData} 
           isPlaying={isPlaying} 
@@ -73,22 +73,22 @@ export function NowPlaying({
       </div>
 
       {/* Track Info */}
-      <div className="text-center mb-5 w-full max-w-sm">
-        <h2 className="text-xl sm:text-2xl font-bold mb-1.5 truncate" key={currentTrack?.id}>
+      <div className="text-center mb-4 sm:mb-5 w-full px-2">
+        <h2 className="text-lg xs:text-xl sm:text-2xl font-bold mb-1 truncate" key={currentTrack?.id}>
           {currentTrack?.title || "No Track Selected"}
         </h2>
-        <p className="text-muted-foreground text-sm sm:text-base truncate">
+        <p className="text-muted-foreground text-sm truncate">
           {currentTrack?.artist || "Unknown Artist"}
         </p>
         {currentTrack?.album && (
-          <p className="text-muted-foreground/60 text-xs mt-1 truncate">
+          <p className="text-muted-foreground/60 text-xs mt-0.5 truncate">
             {currentTrack.album}
           </p>
         )}
       </div>
 
       {/* Progress */}
-      <div className="w-full max-w-sm mb-6">
+      <div className="w-full max-w-sm mb-4 sm:mb-6 px-2">
         <ProgressBar
           currentTime={currentTime}
           duration={duration || currentTrack?.duration || 0}
@@ -110,8 +110,8 @@ export function NowPlaying({
         onToggleLike={onToggleLike}
       />
 
-      {/* Volume - Desktop only */}
-      <div className="mt-8 hidden sm:block">
+      {/* Volume - Tablet and Desktop only */}
+      <div className="mt-6 sm:mt-8 hidden sm:block">
         <VolumeControl
           volume={volume}
           isMuted={isMuted}
