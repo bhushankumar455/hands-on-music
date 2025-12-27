@@ -3,15 +3,13 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { NowPlaying } from "@/components/player/NowPlaying";
 import { GestureControls } from "@/components/gesture/GestureControls";
 import { HandTracking } from "@/components/gesture/HandTracking";
-import { GestureFeedback } from "@/components/gesture/GestureFeedback";
-import { sampleTracks, samplePlaylists, Track } from "@/data/sampleTracks";
-import { Play, Music, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X, Headphones } from "lucide-react";
+import { sampleTracks, samplePlaylists } from "@/data/sampleTracks";
+import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GestureType } from "@/hooks/useHandTracking";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 type View = "playing" | "playlists" | "queue" | "search" | "liked";
@@ -88,10 +86,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground dark">
-      <GestureFeedback gesture={activeGesture} />
-      
       <div className="flex h-screen">
-        {/* Mobile Header */}
         <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-card/95 backdrop-blur border-b border-border p-4 flex items-center justify-between">
           <h1 className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent flex items-center gap-2">
             <Headphones className="h-5 w-5 text-primary" />
@@ -382,7 +377,18 @@ const Index = () => {
           </div>
 
           {/* Gesture Control Panel */}
-          <div className="lg:w-80 border-t lg:border-t-0 lg:border-l border-border bg-card/50">
+          <div className="lg:w-80 border-t lg:border-t-0 lg:border-l border-border bg-card/50 relative">
+            {/* Gesture Feedback - only in this panel */}
+            {activeGesture && (
+              <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-primary/20 backdrop-blur-sm border border-primary/30 animate-pulse">
+                  <span className="text-lg font-semibold text-primary">
+                    {activeGesture.replace("-", " ").toUpperCase()}
+                  </span>
+                </div>
+              </div>
+            )}
+            
             <Tabs value={gestureMode} onValueChange={(v) => setGestureMode(v as "hand" | "mouse")} className="h-full flex flex-col">
               <div className="p-4 border-b border-border">
                 <h2 className="text-lg font-semibold mb-3">Gesture Controls</h2>
