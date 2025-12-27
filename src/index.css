@@ -80,6 +80,7 @@
 @layer base {
   * {
     @apply border-0;
+    box-sizing: border-box;
   }
 
   html {
@@ -91,12 +92,18 @@
     @apply bg-background text-foreground antialiased;
     overflow: hidden;
     overscroll-behavior: none;
+    line-height: 1.5;
   }
 
   /* Remove default focus outlines, add custom */
   button:focus-visible,
   input:focus-visible {
     @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
+  }
+
+  /* Prevent any unwanted borders/lines */
+  hr, div, section, aside, header, footer, nav {
+    border: none;
   }
 }
 
