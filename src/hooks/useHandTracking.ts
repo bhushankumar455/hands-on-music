@@ -421,7 +421,9 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
 
     try {
       const hands = new Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+        // IMPORTANT: Pin to the installed @mediapipe/hands version to avoid WASM/JS mismatches
+        locateFile: (file) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`,
       });
 
       hands.setOptions({
@@ -438,7 +440,12 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
         const camera = new Camera(videoRef.current, {
           onFrame: async () => {
             if (handsRef.current && videoRef.current) {
-              await handsRef.current.send({ image: videoRef.current });
+              try {
+                await handsRef.current.send({ image: videoRef.current });
+              } catch (e) {
+                // Prevent unhandled promise rejections from MediaPipe WASM aborts
+                // (errors are surfaced via startTracking catch on next start attempt)
+              }
             }
           },
           width: 640,
