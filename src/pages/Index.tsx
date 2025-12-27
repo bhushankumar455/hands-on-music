@@ -1,11 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useSpotifyPlayer } from "@/hooks/useSpotifyPlayer";
 import { SpotifyNowPlaying } from "@/components/player/SpotifyNowPlaying";
 import { GestureControls } from "@/components/gesture/GestureControls";
 import { HandTracking } from "@/components/gesture/HandTracking";
 import { GestureFeedback } from "@/components/gesture/GestureFeedback";
-import { spotifyPlaylistsData, allSpotifyTracks } from "@/data/spotifyTracks";
-import { Play, Music, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X, Headphones } from "lucide-react";
+import { spotifyPlaylistsData, allSpotifyTracks, SpotifyTrack } from "@/data/spotifyTracks";
+import { Play, Music, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X, Headphones, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GestureType } from "@/hooks/useHandTracking";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
 
 type View = "playing" | "playlists" | "queue" | "search" | "liked";
 
@@ -22,6 +23,10 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<View>("playing");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleGesture = useCallback((gesture: GestureType) => {
     if (!gesture) return;
@@ -69,6 +74,48 @@ const Index = () => {
     }
   }, [player]);
 
+  // Debounced Spotify search
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    const trimmed = searchQuery.trim();
+    if (!trimmed || trimmed.length < 2) {
+      setSearchResults([]);
+      setSearchError(null);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError(null);
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("spotify-search", {
+          body: { query: trimmed, limit: 20 },
+        });
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        setSearchResults(data.tracks || []);
+      } catch (err) {
+        console.error("Spotify search error:", err);
+        setSearchError(err instanceof Error ? err.message : "Search failed");
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
+
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchQuery]);
+
+  // Local filter for offline tracks (fallback)
   const filteredTracks = searchQuery.trim() 
     ? allSpotifyTracks.filter(track => 
         track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -273,45 +320,94 @@ const Index = () => {
             
             {currentView === "search" && (
               <div className="p-6">
-                <h2 className="text-2xl font-bold mb-6">Search</h2>
+                <h2 className="text-2xl font-bold mb-2">Search Spotify</h2>
+                <p className="text-muted-foreground text-sm mb-6">Search any song on Spotify</p>
                 <div className="relative mb-6">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search songs or artists..."
-                    className="pl-10 h-12 bg-secondary/50 border-0"
+                    placeholder="Search songs, artists, albums..."
+                    className="pl-10 pr-10 h-12 bg-secondary/50 border-0"
                   />
+                  {isSearching && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />
+                  )}
                 </div>
                 
                 {!searchQuery && (
                   <div className="text-center py-12 text-muted-foreground">
                     <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Search for Hindi or Hollywood songs</p>
+                    <p>Search for any song on Spotify</p>
+                    <p className="text-sm mt-2">Type at least 2 characters to search</p>
+                  </div>
+                )}
+
+                {searchError && (
+                  <div className="text-center py-8 text-destructive">
+                    <p>{searchError}</p>
+                    <p className="text-sm mt-2 text-muted-foreground">Showing local results instead</p>
                   </div>
                 )}
                 
-                {searchQuery && filteredTracks.length === 0 && (
+                {searchQuery && !isSearching && searchResults.length === 0 && filteredTracks.length === 0 && !searchError && (
                   <div className="text-center py-12 text-muted-foreground">
                     <p>No results for "{searchQuery}"</p>
                   </div>
                 )}
-                
-                <div className="space-y-2">
-                  {filteredTracks.map((track) => (
-                    <button
-                      key={track.id}
-                      onClick={() => { player.playTrack(track, allSpotifyTracks); setCurrentView("playing"); }}
-                      className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors text-left"
-                    >
-                      <img src={track.coverUrl} alt="" className="w-14 h-14 rounded object-cover" />
-                      <div className="flex-1">
-                        <p className="font-medium">{track.title}</p>
-                        <p className="text-sm text-muted-foreground">{track.artist}</p>
+
+                {/* Spotify API Results */}
+                {searchResults.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                      </svg>
+                      Spotify Results
+                    </h3>
+                    <ScrollArea className="h-[calc(100vh-350px)]">
+                      <div className="space-y-2">
+                        {searchResults.map((track) => (
+                          <button
+                            key={track.id}
+                            onClick={() => { player.playTrack(track, searchResults); setCurrentView("playing"); }}
+                            className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors text-left"
+                          >
+                            <img src={track.coverUrl} alt="" className="w-14 h-14 rounded object-cover" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{track.title}</p>
+                              <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
+                              <p className="text-xs text-muted-foreground/60 truncate">{track.album}</p>
+                            </div>
+                            <span className="text-sm text-muted-foreground">{formatDuration(track.duration)}</span>
+                          </button>
+                        ))}
                       </div>
-                    </button>
-                  ))}
-                </div>
+                    </ScrollArea>
+                  </div>
+                )}
+
+                {/* Local Results Fallback */}
+                {searchResults.length === 0 && filteredTracks.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3">Local Results</h3>
+                    <div className="space-y-2">
+                      {filteredTracks.map((track) => (
+                        <button
+                          key={track.id}
+                          onClick={() => { player.playTrack(track, allSpotifyTracks); setCurrentView("playing"); }}
+                          className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors text-left"
+                        >
+                          <img src={track.coverUrl} alt="" className="w-14 h-14 rounded object-cover" />
+                          <div className="flex-1">
+                            <p className="font-medium">{track.title}</p>
+                            <p className="text-sm text-muted-foreground">{track.artist}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             
