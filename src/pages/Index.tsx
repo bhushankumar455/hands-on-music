@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
-import { YouTubeNowPlaying } from "@/components/player/YouTubeNowPlaying";
+import { useSpotifyPlayer } from "@/hooks/useSpotifyPlayer";
+import { SpotifyNowPlaying } from "@/components/player/SpotifyNowPlaying";
 import { GestureControls } from "@/components/gesture/GestureControls";
 import { HandTracking } from "@/components/gesture/HandTracking";
 import { GestureFeedback } from "@/components/gesture/GestureFeedback";
-import { youtubePlaylistsData, allYouTubeTracks, YouTubeTrack } from "@/data/youtubeTracks";
-import { Play, Music, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X } from "lucide-react";
+import { spotifyPlaylistsData, allSpotifyTracks, SpotifyTrack } from "@/data/spotifyTracks";
+import { Play, Music, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GestureType } from "@/hooks/useHandTracking";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -17,7 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 type View = "playing" | "playlists" | "queue" | "search" | "liked";
 
 const Index = () => {
-  const player = useYouTubePlayer();
+  const player = useSpotifyPlayer();
   const [activeGesture, setActiveGesture] = useState<GestureType>(null);
   const [currentView, setCurrentView] = useState<View>("playing");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -70,7 +70,7 @@ const Index = () => {
   }, [player]);
 
   const filteredTracks = searchQuery.trim() 
-    ? allYouTubeTracks.filter(track => 
+    ? allSpotifyTracks.filter(track => 
         track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         track.artist.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -97,9 +97,9 @@ const Index = () => {
       <div className="flex h-screen">
         {/* Mobile Header */}
         <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-card/95 backdrop-blur border-b border-border p-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gradient flex items-center gap-2">
-            <Music className="h-5 w-5" />
-            GesturePlay
+          <h1 className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent flex items-center gap-2">
+            <Headphones className="h-5 w-5 text-primary" />
+            AIMusicPlay
           </h1>
           <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -130,11 +130,11 @@ const Index = () => {
         {/* Desktop Sidebar */}
         <aside className="w-64 bg-card border-r border-border hidden lg:flex flex-col">
           <div className="p-6">
-            <h1 className="text-2xl font-bold text-gradient flex items-center gap-2">
-              <Music className="h-6 w-6" />
-              GesturePlay
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent flex items-center gap-2">
+              <Headphones className="h-6 w-6 text-primary" />
+              AIMusicPlay
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">Hindi & Hollywood Hits</p>
+            <p className="text-xs text-muted-foreground mt-1">Gesture Controlled Music</p>
           </div>
           
           <nav className="flex-1 p-4 space-y-1">
@@ -178,22 +178,17 @@ const Index = () => {
         <main className="flex-1 flex flex-col lg:flex-row overflow-hidden pt-16 lg:pt-0">
           <div className="flex-1 overflow-auto">
             {currentView === "playing" && (
-              <YouTubeNowPlaying
+              <SpotifyNowPlaying
                 currentTrack={player.currentTrack}
                 isPlaying={player.isPlaying}
-                currentTime={player.currentTime}
-                duration={player.duration}
                 volume={player.volume}
                 isMuted={player.isMuted}
                 isShuffled={player.isShuffled}
                 repeatMode={player.repeatMode}
                 isLiked={player.isLiked}
-                onReady={player.onReady}
-                onStateChange={player.onStateChange}
                 onTogglePlay={player.togglePlay}
                 onNext={player.next}
                 onPrevious={player.previous}
-                onSeek={player.seek}
                 onVolumeChange={player.setVolume}
                 onToggleMute={player.toggleMute}
                 onToggleShuffle={player.toggleShuffle}
@@ -206,7 +201,7 @@ const Index = () => {
               <div className="p-6">
                 <h2 className="text-2xl font-bold mb-6">Playlists</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {youtubePlaylistsData.map((playlist) => (
+                  {spotifyPlaylistsData.map((playlist) => (
                     <button
                       key={playlist.id}
                       onClick={() => { 
@@ -305,7 +300,7 @@ const Index = () => {
                   {filteredTracks.map((track) => (
                     <button
                       key={track.id}
-                      onClick={() => { player.playTrack(track, allYouTubeTracks); setCurrentView("playing"); }}
+                      onClick={() => { player.playTrack(track, allSpotifyTracks); setCurrentView("playing"); }}
                       className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors text-left"
                     >
                       <img src={track.coverUrl} alt="" className="w-14 h-14 rounded object-cover" />
@@ -338,7 +333,7 @@ const Index = () => {
                   <div className="text-center py-12 text-muted-foreground">
                     <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Songs you like will appear here</p>
-                    <p className="text-sm mt-1">Double-tap to like songs</p>
+                    <p className="text-sm mt-1">Double-tap or thumbs up to like songs</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
