@@ -7,6 +7,7 @@ import { SleepTimer } from "@/components/player/SleepTimer";
 import { SpeedControl } from "@/components/player/SpeedControl";
 import { KeyboardShortcutsHelp } from "@/components/player/KeyboardShortcutsHelp";
 import { AmbientBackground } from "@/components/player/AmbientBackground";
+import { EqualizerPanel, presets } from "@/components/player/EqualizerPanel";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { sampleTracks, samplePlaylists } from "@/data/sampleTracks";
 import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Disc3, ChevronRight } from "lucide-react";
@@ -168,6 +169,12 @@ const Index = () => {
               <div className="h-full animate-fade-in relative">
                 {/* Extra controls bar */}
                 <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-0.5 sm:gap-1 z-10">
+                  <EqualizerPanel
+                    bands={player.eqBands}
+                    onBandChange={player.setEQBand}
+                    onPresetChange={(preset) => player.setEQPreset(preset.name, preset.bands)}
+                    activePreset={player.activeEQPreset}
+                  />
                   <SpeedControl 
                     speed={player.playbackSpeed} 
                     onSpeedChange={player.setPlaybackSpeed} 
