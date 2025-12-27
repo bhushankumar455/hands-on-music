@@ -7,40 +7,32 @@ interface AudioEqualizerProps {
 }
 
 export function AudioEqualizer({ audioData, isPlaying, className }: AudioEqualizerProps) {
-  // Use fewer bars for mobile, more for desktop
-  const displayBars = 24;
+  const displayBars = 32;
   const bars = audioData.slice(0, displayBars);
 
   return (
-    <div className={cn("flex items-end justify-center gap-[2px] h-16", className)}>
+    <div className={cn("flex items-center justify-center gap-[3px] h-10", className)}>
       {bars.map((value, index) => {
-        // Create a smooth curve effect - middle bars are taller
+        // Create a smooth wave effect
         const centerIndex = displayBars / 2;
         const distanceFromCenter = Math.abs(index - centerIndex) / centerIndex;
-        const heightMultiplier = 1 - (distanceFromCenter * 0.3);
+        const heightMultiplier = 1 - (distanceFromCenter * 0.4);
         
         // Calculate bar height
-        const minHeight = 4;
-        const maxHeight = 64;
+        const minHeight = 3;
+        const maxHeight = 40;
         const height = isPlaying 
           ? Math.max(minHeight, value * maxHeight * heightMultiplier)
-          : minHeight + Math.sin((index / displayBars) * Math.PI) * 8;
-
-        // Color gradient from primary to accent
-        const hue = 262 + (index / displayBars) * 20;
+          : minHeight + Math.sin((index / displayBars) * Math.PI) * 4;
         
         return (
           <div
             key={index}
-            className="rounded-full transition-all duration-75 ease-out"
+            className="rounded-full transition-all duration-100 ease-out bg-primary/80"
             style={{
-              width: '6px',
+              width: '3px',
               height: `${height}px`,
-              background: isPlaying 
-                ? `linear-gradient(to top, hsl(${hue}, 83%, 58%), hsl(${hue + 15}, 70%, 65%))`
-                : 'hsl(var(--muted))',
-              opacity: isPlaying ? 0.9 + value * 0.1 : 0.4,
-              transform: isPlaying ? `scaleY(${0.8 + value * 0.2})` : 'scaleY(1)',
+              opacity: isPlaying ? 0.7 + value * 0.3 : 0.3,
             }}
           />
         );

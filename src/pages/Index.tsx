@@ -65,13 +65,13 @@ const Index = () => {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-background text-foreground dark flex flex-col">
-      {/* Main Content */}
+      {/* Main Layout */}
       <main className="flex-1 flex overflow-hidden">
         {/* Desktop Sidebar */}
-        <aside className="w-60 bg-card hidden lg:flex flex-col shrink-0">
-          <div className="p-5">
-            <h1 className="text-xl font-bold text-primary flex items-center gap-2.5">
-              <Disc3 className="h-6 w-6" />
+        <aside className="w-56 bg-card/50 hidden lg:flex flex-col shrink-0">
+          <div className="p-4 pt-5">
+            <h1 className="text-lg font-bold text-primary flex items-center gap-2">
+              <Disc3 className="h-5 w-5" />
               AIMusicPlay
             </h1>
           </div>
@@ -115,31 +115,16 @@ const Index = () => {
 
           {/* Mini Player */}
           {player.currentTrack && (
-            <div className="p-3 border-t border-border/50">
+            <div className="p-3 mt-auto">
               <button 
                 onClick={() => setCurrentView("playing")}
-                className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/50 transition-colors"
+                className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
               >
-                <div className="relative">
-                  <img 
-                    src={player.currentTrack.coverUrl} 
-                    alt="" 
-                    className={cn(
-                      "w-11 h-11 rounded-lg object-cover",
-                      player.isPlaying && "animate-pulse-soft"
-                    )} 
-                  />
-                  {player.isPlaying && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
-                      <div className="flex items-end gap-0.5 h-4">
-                        <div className="w-0.5 h-2 bg-primary animate-pulse" />
-                        <div className="w-0.5 h-3 bg-primary animate-pulse" style={{ animationDelay: "75ms" }} />
-                        <div className="w-0.5 h-4 bg-primary animate-pulse" style={{ animationDelay: "150ms" }} />
-                        <div className="w-0.5 h-2 bg-primary animate-pulse" style={{ animationDelay: "225ms" }} />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <img 
+                  src={player.currentTrack.coverUrl} 
+                  alt="" 
+                  className="w-10 h-10 rounded-md object-cover" 
+                />
                 <div className="flex-1 min-w-0 text-left">
                   <p className="font-medium truncate text-sm">{player.currentTrack.title}</p>
                   <p className="text-xs text-muted-foreground truncate">{player.currentTrack.artist}</p>
