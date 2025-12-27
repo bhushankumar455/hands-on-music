@@ -12,15 +12,10 @@ import {
   VolumeX
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GestureType } from "@/hooks/useHandTracking";
 
-export type GestureType = 
-  | "swipe-left" 
-  | "swipe-right" 
-  | "tap" 
-  | "swipe-up" 
-  | "swipe-down" 
-  | "double-tap" 
-  | "pinch";
+// Re-export for convenience
+export type { GestureType } from "@/hooks/useHandTracking";
 
 interface GestureControlsProps {
   onGesture: (gesture: GestureType) => void;
@@ -29,8 +24,10 @@ interface GestureControlsProps {
   isMuted: boolean;
 }
 
+type SimulatedGesture = "swipe-left" | "swipe-right" | "tap" | "swipe-up" | "swipe-down" | "double-tap" | "pinch";
+
 interface GestureButton {
-  gesture: GestureType;
+  gesture: SimulatedGesture;
   icon: React.ReactNode;
   label: string;
   position: string;
@@ -43,10 +40,10 @@ export function GestureControls({
   isLiked,
   isMuted 
 }: GestureControlsProps) {
-  const [activeGesture, setActiveGesture] = useState<GestureType | null>(null);
+  const [activeGesture, setActiveGesture] = useState<SimulatedGesture | null>(null);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
-  const handleGesture = useCallback((gesture: GestureType, event?: React.MouseEvent) => {
+  const handleGesture = useCallback((gesture: SimulatedGesture, event?: React.MouseEvent) => {
     setActiveGesture(gesture);
     
     // Add ripple effect
