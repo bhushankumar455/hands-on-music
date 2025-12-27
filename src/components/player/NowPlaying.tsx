@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Track } from "@/data/sampleTracks";
 import { PlaybackControls } from "./PlaybackControls";
 import { ProgressBar } from "./ProgressBar";
 import { VolumeControl } from "./VolumeControl";
-import { AudioEqualizer } from "./AudioEqualizer";
+import { AudioVisualizer, VisualizerTheme, VisualizerThemeSelector } from "./AudioVisualizer";
 import { cn } from "@/lib/utils";
 
 interface NowPlayingProps {
@@ -48,6 +49,8 @@ export function NowPlaying({
   onToggleRepeat,
   onToggleLike,
 }: NowPlayingProps) {
+  const [visualizerTheme, setVisualizerTheme] = useState<VisualizerTheme>("bars");
+
   return (
     <div className="flex flex-col items-center justify-center h-full px-4 py-4 sm:px-6 sm:py-6 md:py-8 max-w-md mx-auto">
       {/* Album Art with glow effect */}
@@ -64,11 +67,18 @@ export function NowPlaying({
         </div>
       </div>
 
-      {/* Audio Equalizer */}
-      <div className="w-full max-w-[220px] xs:max-w-[260px] sm:max-w-[300px] md:max-w-[320px] mb-4 sm:mb-6">
-        <AudioEqualizer 
+      {/* Audio Visualizer with Theme Selector */}
+      <div className="w-full max-w-[220px] xs:max-w-[260px] sm:max-w-[300px] md:max-w-[320px] mb-4 sm:mb-6 relative">
+        <div className="absolute -top-1 right-0 z-10">
+          <VisualizerThemeSelector 
+            currentTheme={visualizerTheme} 
+            onThemeChange={setVisualizerTheme} 
+          />
+        </div>
+        <AudioVisualizer 
           audioData={audioData} 
-          isPlaying={isPlaying} 
+          isPlaying={isPlaying}
+          theme={visualizerTheme}
         />
       </div>
 
