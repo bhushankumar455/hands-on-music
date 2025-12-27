@@ -9,6 +9,7 @@ import { KeyboardShortcutsHelp } from "@/components/player/KeyboardShortcutsHelp
 import { AmbientBackground } from "@/components/player/AmbientBackground";
 import { EqualizerPanel, presets } from "@/components/player/EqualizerPanel";
 import { MiniPlayer } from "@/components/player/MiniPlayer";
+import { CrossfadeControl } from "@/components/player/CrossfadeControl";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { sampleTracks, samplePlaylists } from "@/data/sampleTracks";
 import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Disc3, ChevronRight } from "lucide-react";
@@ -175,6 +176,12 @@ const Index = () => {
                     onBandChange={player.setEQBand}
                     onPresetChange={(preset) => player.setEQPreset(preset.name, preset.bands)}
                     activePreset={player.activeEQPreset}
+                  />
+                  <CrossfadeControl
+                    duration={player.crossfadeDuration}
+                    enabled={player.crossfadeEnabled}
+                    onDurationChange={player.setCrossfadeDuration}
+                    onToggle={player.toggleCrossfade}
                   />
                   <SpeedControl 
                     speed={player.playbackSpeed} 

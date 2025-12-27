@@ -36,15 +36,20 @@ interface AudioPlayerState {
   playbackSpeed: number;
   eqBands: EQBand[];
   activeEQPreset: string | null;
+  crossfadeEnabled: boolean;
+  crossfadeDuration: number;
 }
 
 export function useAudioPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const nextAudioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const animationRef = useRef<number>(0);
   const eqFiltersRef = useRef<BiquadFilterNode[]>([]);
+  const crossfadeIntervalRef = useRef<number | null>(null);
+  const isCrossfadingRef = useRef(false);
   
   const [state, setState] = useState<AudioPlayerState>({
     isPlaying: false,
@@ -64,6 +69,8 @@ export function useAudioPlayer() {
     playbackSpeed: 1,
     eqBands: defaultEQBands,
     activeEQPreset: "Flat",
+    crossfadeEnabled: false,
+    crossfadeDuration: 4,
   });
 
   // Audio visualization
@@ -90,11 +97,16 @@ export function useAudioPlayer() {
     animationRef.current = requestAnimationFrame(updateAudioData);
   }, [state.isPlaying]);
 
-  // Initialize audio element and analyzer
+  // Initialize audio elements
   useEffect(() => {
     audioRef.current = new Audio();
     audioRef.current.volume = state.volume;
     audioRef.current.crossOrigin = "anonymous";
+    
+    // Create secondary audio element for crossfade
+    nextAudioRef.current = new Audio();
+    nextAudioRef.current.volume = 0;
+    nextAudioRef.current.crossOrigin = "anonymous";
     
     const audio = audioRef.current;
 
@@ -211,6 +223,68 @@ export function useAudioPlayer() {
     }
   }, [state.isPlaying, play, pause]);
 
+  // Crossfade to next track
+  const performCrossfade = useCallback((nextTrack: Track, nextIndex: number) => {
+    if (!audioRef.current || !nextAudioRef.current || isCrossfadingRef.current) return;
+    
+    isCrossfadingRef.current = true;
+    const currentAudio = audioRef.current;
+    const nextAudio = nextAudioRef.current;
+    const fadeDuration = state.crossfadeDuration * 1000;
+    const fadeSteps = 50;
+    const stepDuration = fadeDuration / fadeSteps;
+    const volumeStep = state.volume / fadeSteps;
+    
+    // Prepare next track
+    nextAudio.src = nextTrack.audioUrl;
+    nextAudio.load();
+    nextAudio.volume = 0;
+    
+    nextAudio.play().catch(console.error);
+    
+    let currentStep = 0;
+    
+    crossfadeIntervalRef.current = window.setInterval(() => {
+      currentStep++;
+      
+      // Fade out current
+      const newCurrentVolume = Math.max(0, state.volume - (volumeStep * currentStep));
+      currentAudio.volume = newCurrentVolume;
+      
+      // Fade in next
+      const newNextVolume = Math.min(state.volume, volumeStep * currentStep);
+      nextAudio.volume = newNextVolume;
+      
+      if (currentStep >= fadeSteps) {
+        if (crossfadeIntervalRef.current) {
+          clearInterval(crossfadeIntervalRef.current);
+          crossfadeIntervalRef.current = null;
+        }
+        
+        // Swap audio references
+        currentAudio.pause();
+        currentAudio.src = nextTrack.audioUrl;
+        currentAudio.load();
+        currentAudio.volume = state.volume;
+        
+        nextAudio.pause();
+        nextAudio.volume = 0;
+        
+        currentAudio.play().catch(console.error);
+        
+        isCrossfadingRef.current = false;
+      }
+    }, stepDuration);
+    
+    // Update state
+    setState(prev => ({
+      ...prev,
+      queueIndex: nextIndex,
+      currentTrack: nextTrack,
+      isLiked: prev.likedTracks.has(nextTrack.id),
+    }));
+  }, [state.crossfadeDuration, state.volume]);
+
   const handleNext = useCallback(() => {
     setState(prev => {
       let nextIndex: number;
@@ -230,6 +304,13 @@ export function useAudioPlayer() {
       }
 
       const nextTrack = prev.queue[nextIndex];
+      
+      // If crossfade is enabled and playing, perform crossfade
+      if (prev.crossfadeEnabled && prev.isPlaying && !isCrossfadingRef.current) {
+        performCrossfade(nextTrack, nextIndex);
+        return prev; // State will be updated in performCrossfade
+      }
+      
       return {
         ...prev,
         queueIndex: nextIndex,
@@ -237,7 +318,7 @@ export function useAudioPlayer() {
         isLiked: prev.likedTracks.has(nextTrack.id),
       };
     });
-  }, []);
+  }, [performCrossfade]);
 
   const handlePrevious = useCallback(() => {
     if (audioRef.current && audioRef.current.currentTime > 3) {
@@ -390,6 +471,14 @@ export function useAudioPlayer() {
     }));
   }, []);
 
+  const setCrossfadeDuration = useCallback((duration: number) => {
+    setState(prev => ({ ...prev, crossfadeDuration: duration }));
+  }, []);
+
+  const toggleCrossfade = useCallback(() => {
+    setState(prev => ({ ...prev, crossfadeEnabled: !prev.crossfadeEnabled }));
+  }, []);
+
   return {
     ...state,
     play,
@@ -410,5 +499,7 @@ export function useAudioPlayer() {
     setPlaybackSpeed,
     setEQBand,
     setEQPreset,
+    setCrossfadeDuration,
+    toggleCrossfade,
   };
 }
