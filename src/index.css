@@ -114,7 +114,21 @@
   }
   
   .safe-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    padding-bottom: max(env(safe-area-inset-bottom), 12px);
+  }
+
+  .safe-left {
+    padding-left: max(env(safe-area-inset-left), 0px);
+  }
+
+  .safe-right {
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
+
+  /* Touch-friendly tap targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .player-gradient {
