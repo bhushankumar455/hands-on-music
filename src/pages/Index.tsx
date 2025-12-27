@@ -1,18 +1,23 @@
 import { useState, useCallback } from "react";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { NowPlaying } from "@/components/player/NowPlaying";
-import { GestureControls, GestureType } from "@/components/gesture/GestureControls";
+import { GestureControls } from "@/components/gesture/GestureControls";
+import { HandTracking } from "@/components/gesture/HandTracking";
 import { GestureFeedback } from "@/components/gesture/GestureFeedback";
-import { samplePlaylists, Track } from "@/data/sampleTracks";
-import { Play, Music, ListMusic } from "lucide-react";
+import { samplePlaylists } from "@/data/sampleTracks";
+import { Play, Music, ListMusic, Hand, MousePointer } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GestureType } from "@/hooks/useHandTracking";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Index = () => {
   const player = useAudioPlayer();
-  const [activeGesture, setActiveGesture] = useState<GestureType | null>(null);
+  const [activeGesture, setActiveGesture] = useState<GestureType>(null);
   const [showPlaylist, setShowPlaylist] = useState(false);
 
   const handleGesture = useCallback((gesture: GestureType) => {
+    if (!gesture) return;
+    
     setActiveGesture(gesture);
     setTimeout(() => setActiveGesture(null), 100);
 
@@ -146,14 +151,44 @@ const Index = () => {
             )}
           </div>
 
-          {/* Gesture Controls Panel */}
-          <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border bg-card/50">
-            <GestureControls
-              onGesture={handleGesture}
-              isPlaying={player.isPlaying}
-              isLiked={player.isLiked}
-              isMuted={player.isMuted}
-            />
+          {/* Gesture Controls Panel with Tabs */}
+          <aside className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l border-border bg-card/50 flex flex-col">
+            <Tabs defaultValue="camera" className="flex-1 flex flex-col">
+              <TabsList className="w-full rounded-none border-b border-border bg-transparent p-0">
+                <TabsTrigger 
+                  value="camera" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
+                >
+                  <Hand className="h-4 w-4 mr-2" />
+                  Camera
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="simulate" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
+                >
+                  <MousePointer className="h-4 w-4 mr-2" />
+                  Simulate
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="camera" className="flex-1 mt-0 overflow-hidden">
+                <HandTracking
+                  onGesture={handleGesture}
+                  isPlaying={player.isPlaying}
+                  isLiked={player.isLiked}
+                  isMuted={player.isMuted}
+                />
+              </TabsContent>
+              
+              <TabsContent value="simulate" className="flex-1 mt-0 overflow-hidden">
+                <GestureControls
+                  onGesture={(g) => handleGesture(g as GestureType)}
+                  isPlaying={player.isPlaying}
+                  isLiked={player.isLiked}
+                  isMuted={player.isMuted}
+                />
+              </TabsContent>
+            </Tabs>
           </aside>
         </main>
       </div>
