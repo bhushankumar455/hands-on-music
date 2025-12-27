@@ -68,7 +68,7 @@ const Index = () => {
       {/* Main Layout */}
       <main className="flex-1 flex overflow-hidden">
         {/* Desktop Sidebar */}
-        <aside className="w-56 bg-card/50 hidden lg:flex flex-col shrink-0">
+        <aside className="w-56 bg-background hidden lg:flex flex-col shrink-0">
           <div className="p-4 pt-5">
             <h1 className="text-lg font-bold text-primary flex items-center gap-2">
               <Disc3 className="h-5 w-5" />
