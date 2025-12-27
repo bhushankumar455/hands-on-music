@@ -28,44 +28,35 @@ const Index = () => {
     if (!gesture) return;
     
     setActiveGesture(gesture);
-    setTimeout(() => setActiveGesture(null), 100);
+    setTimeout(() => setActiveGesture(null), 800);
 
     switch (gesture) {
       case "tap":
         player.togglePlay();
-        toast({ title: player.isPlaying ? "Paused" : "Playing" });
         break;
       case "swipe-left":
         player.previous();
-        toast({ title: "Previous Track" });
         break;
       case "swipe-right":
         player.next();
-        toast({ title: "Next Track" });
         break;
       case "swipe-up":
         player.setVolume(Math.min(1, player.volume + 0.15));
-        toast({ title: "Volume Up", description: `${Math.round(player.volume * 100 + 15)}%` });
         break;
       case "swipe-down":
         player.setVolume(Math.max(0, player.volume - 0.15));
-        toast({ title: "Volume Down", description: `${Math.round(Math.max(0, player.volume * 100 - 15))}%` });
         break;
       case "double-tap":
         player.toggleLike();
-        toast({ title: player.isLiked ? "Removed from Liked" : "Added to Liked ❤️" });
         break;
       case "pinch":
         player.toggleMute();
-        toast({ title: player.isMuted ? "Unmuted" : "Muted 🔇" });
         break;
       case "open-palm":
         player.pause();
-        toast({ title: "Paused ✋" });
         break;
       case "thumbs-up":
         if (!player.isLiked) player.toggleLike();
-        toast({ title: "👍 Liked!" });
         break;
     }
   }, [player]);
