@@ -1,6 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Track, sampleTracks } from "@/data/sampleTracks";
 
+export interface EQBand {
+  frequency: number;
+  gain: number;
+  label: string;
+}
+
+const defaultEQBands: EQBand[] = [
+  { frequency: 60, gain: 0, label: "60" },
+  { frequency: 170, gain: 0, label: "170" },
+  { frequency: 310, gain: 0, label: "310" },
+  { frequency: 600, gain: 0, label: "600" },
+  { frequency: 1000, gain: 0, label: "1K" },
+  { frequency: 3000, gain: 0, label: "3K" },
+  { frequency: 6000, gain: 0, label: "6K" },
+  { frequency: 12000, gain: 0, label: "12K" },
+];
+
 interface AudioPlayerState {
   isPlaying: boolean;
   currentTrack: Track | null;
@@ -17,6 +34,8 @@ interface AudioPlayerState {
   recentlyPlayed: Track[];
   audioData: number[];
   playbackSpeed: number;
+  eqBands: EQBand[];
+  activeEQPreset: string | null;
 }
 
 export function useAudioPlayer() {
@@ -25,6 +44,7 @@ export function useAudioPlayer() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const animationRef = useRef<number>(0);
+  const eqFiltersRef = useRef<BiquadFilterNode[]>([]);
   
   const [state, setState] = useState<AudioPlayerState>({
     isPlaying: false,
@@ -42,6 +62,8 @@ export function useAudioPlayer() {
     recentlyPlayed: [],
     audioData: new Array(32).fill(0),
     playbackSpeed: 1,
+    eqBands: defaultEQBands,
+    activeEQPreset: "Flat",
   });
 
   // Audio visualization
@@ -89,7 +111,7 @@ export function useAudioPlayer() {
     };
 
     const handlePlay = () => {
-      // Setup audio context for visualization on first play
+      // Setup audio context for visualization and EQ on first play
       if (!audioContextRef.current) {
         try {
           audioContextRef.current = new AudioContext();
@@ -97,7 +119,24 @@ export function useAudioPlayer() {
           analyserRef.current.fftSize = 256;
           
           sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
-          sourceRef.current.connect(analyserRef.current);
+          
+          // Create EQ filters
+          eqFiltersRef.current = defaultEQBands.map((band) => {
+            const filter = audioContextRef.current!.createBiquadFilter();
+            filter.type = "peaking";
+            filter.frequency.value = band.frequency;
+            filter.Q.value = 1.4;
+            filter.gain.value = band.gain;
+            return filter;
+          });
+          
+          // Connect: source -> filters -> analyser -> destination
+          let lastNode: AudioNode = sourceRef.current;
+          eqFiltersRef.current.forEach((filter) => {
+            lastNode.connect(filter);
+            lastNode = filter;
+          });
+          lastNode.connect(analyserRef.current);
           analyserRef.current.connect(audioContextRef.current.destination);
         } catch (err) {
           console.log("Audio context not available for visualization");
@@ -327,6 +366,30 @@ export function useAudioPlayer() {
     }
   }, []);
 
+  const setEQBand = useCallback((index: number, gain: number) => {
+    if (eqFiltersRef.current[index]) {
+      eqFiltersRef.current[index].gain.value = gain;
+    }
+    setState(prev => {
+      const newBands = [...prev.eqBands];
+      newBands[index] = { ...newBands[index], gain };
+      return { ...prev, eqBands: newBands, activeEQPreset: null };
+    });
+  }, []);
+
+  const setEQPreset = useCallback((presetName: string, bands: number[]) => {
+    bands.forEach((gain, index) => {
+      if (eqFiltersRef.current[index]) {
+        eqFiltersRef.current[index].gain.value = gain;
+      }
+    });
+    setState(prev => ({
+      ...prev,
+      eqBands: prev.eqBands.map((band, i) => ({ ...band, gain: bands[i] || 0 })),
+      activeEQPreset: presetName,
+    }));
+  }, []);
+
   return {
     ...state,
     play,
@@ -345,5 +408,7 @@ export function useAudioPlayer() {
     removeFromQueue,
     getLikedTracks,
     setPlaybackSpeed,
+    setEQBand,
+    setEQPreset,
   };
 }
