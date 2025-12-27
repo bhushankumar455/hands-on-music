@@ -3,6 +3,11 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { NowPlaying } from "@/components/player/NowPlaying";
 import { GestureControls } from "@/components/gesture/GestureControls";
 import { HandTracking } from "@/components/gesture/HandTracking";
+import { SleepTimer } from "@/components/player/SleepTimer";
+import { SpeedControl } from "@/components/player/SpeedControl";
+import { KeyboardShortcutsHelp } from "@/components/player/KeyboardShortcutsHelp";
+import { AmbientBackground } from "@/components/player/AmbientBackground";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { sampleTracks, samplePlaylists } from "@/data/sampleTracks";
 import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Disc3, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +25,18 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [gestureMode, setGestureMode] = useState<"hand" | "mouse">("mouse");
   const [showGesturePanel, setShowGesturePanel] = useState(true);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onTogglePlay: player.togglePlay,
+    onNext: player.next,
+    onPrevious: player.previous,
+    onVolumeUp: () => player.setVolume(Math.min(1, player.volume + 0.1)),
+    onVolumeDown: () => player.setVolume(Math.max(0, player.volume - 0.1)),
+    onToggleMute: player.toggleMute,
+    onToggleLike: player.toggleLike,
+    onToggleShuffle: player.toggleShuffle,
+  });
 
   const handleGesture = useCallback((gesture: GestureType) => {
     if (!gesture) return;
@@ -64,9 +81,16 @@ const Index = () => {
   ];
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-background text-foreground dark flex flex-col">
+    <div className="h-screen w-screen overflow-hidden bg-background text-foreground dark flex flex-col relative">
+      {/* Ambient Background */}
+      <AmbientBackground 
+        coverUrl={player.currentTrack?.coverUrl} 
+        isPlaying={player.isPlaying}
+        audioData={player.audioData}
+      />
+      
       {/* Main Layout */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex overflow-hidden relative z-10">
         {/* Desktop Sidebar */}
         <aside className="w-56 bg-background hidden lg:flex flex-col shrink-0">
           <div className="p-4 pt-5">
@@ -140,7 +164,20 @@ const Index = () => {
           <div className="flex-1 overflow-auto scrollbar-hide pb-20 lg:pb-0">
             {/* Now Playing */}
             {currentView === "playing" && (
-              <div className="h-full animate-fade-in">
+              <div className="h-full animate-fade-in relative">
+                {/* Extra controls bar */}
+                <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
+                  <SpeedControl 
+                    speed={player.playbackSpeed} 
+                    onSpeedChange={player.setPlaybackSpeed} 
+                  />
+                  <SleepTimer 
+                    onTimerEnd={player.pause} 
+                    isPlaying={player.isPlaying} 
+                  />
+                  <KeyboardShortcutsHelp />
+                </div>
+                
                 <NowPlaying
                   currentTrack={player.currentTrack}
                   isPlaying={player.isPlaying}
