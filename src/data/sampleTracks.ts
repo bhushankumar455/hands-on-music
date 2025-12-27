@@ -3,7 +3,7 @@ export interface Track {
   title: string;
   artist: string;
   album: string;
-  duration: number; // in seconds
+  duration: number;
   coverUrl: string;
   audioUrl: string;
 }
@@ -16,82 +16,100 @@ export interface Playlist {
   tracks: Track[];
 }
 
-// Using royalty-free music from various sources
-// These are sample audio files that work great for demo purposes
-export const sampleTracks: Track[] = [
-  {
-    id: "1",
-    title: "Ethereal Dreams",
-    artist: "Ambient Waves",
-    album: "Cosmic Journey",
-    duration: 180,
-    coverUrl: "https://images.unsplash.com/photo-1614149162883-504ce4d13909?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-  },
-  {
-    id: "2",
-    title: "Neon Lights",
-    artist: "Synthwave Runner",
-    album: "Midnight Drive",
-    duration: 210,
-    coverUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-  },
-  {
-    id: "3",
-    title: "Ocean Breeze",
-    artist: "Chill Collective",
-    album: "Summer Vibes",
-    duration: 195,
-    coverUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-  },
-  {
-    id: "4",
-    title: "Urban Pulse",
-    artist: "Beat Masters",
-    album: "City Nights",
-    duration: 225,
-    coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-  },
-  {
-    id: "5",
-    title: "Starlight Serenade",
-    artist: "Cosmic Keys",
-    album: "Galaxy Dreams",
-    duration: 240,
-    coverUrl: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-  },
-  {
-    id: "6",
-    title: "Morning Dew",
-    artist: "Nature Sounds",
-    album: "Peaceful Moments",
-    duration: 165,
-    coverUrl: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-  },
-  {
-    id: "7",
-    title: "Electric Dreams",
-    artist: "Future Bass",
-    album: "Digital Age",
-    duration: 200,
-    coverUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
-  },
-  {
-    id: "8",
-    title: "Velvet Shadows",
-    artist: "Jazz Ensemble",
-    album: "Late Night Sessions",
-    duration: 255,
-    coverUrl: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=400&h=400&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-  },
+// Generate 100+ sample tracks with variety
+const genres = ["Electronic", "Ambient", "Jazz", "Classical", "Rock", "Pop", "Hip Hop", "R&B", "Folk", "World"];
+const moods = ["Chill", "Energetic", "Melancholic", "Uplifting", "Dreamy", "Intense", "Peaceful", "Groovy"];
+const coverImages = [
+  "https://images.unsplash.com/photo-1614149162883-504ce4d13909?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1484755560615-a4c64e778a6c?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1446057032654-9d8885db76c6?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1526478806334-5fd488fcaabc?w=400&h=400&fit=crop",
 ];
+
+const trackNames = [
+  "Midnight Dreams", "Sunrise Melody", "Ocean Waves", "City Lights", "Forest Walk",
+  "Summer Breeze", "Winter Frost", "Autumn Leaves", "Spring Rain", "Desert Wind",
+  "Mountain Echo", "River Flow", "Starlight", "Moonshine", "Sunset Glow",
+  "Neon Nights", "Electric Soul", "Digital Love", "Analog Heart", "Crystal Clear",
+  "Velvet Sky", "Golden Hour", "Silver Moon", "Bronze Age", "Iron Will",
+  "Cosmic Dance", "Galaxy Spin", "Nebula Dream", "Supernova", "Black Hole",
+  "Time Travel", "Space Walk", "Zero Gravity", "Light Speed", "Warp Drive",
+  "Deep Blue", "Coral Reef", "Tropical Storm", "Hurricane Eye", "Thunder Roll",
+  "Lightning Strike", "Rainbow Bridge", "Cloud Nine", "Heaven Sent", "Earth Bound",
+  "Fire Dance", "Ice Crystal", "Steam Engine", "Wind Chime", "Water Drop",
+  "Soul Search", "Mind Wander", "Heart Beat", "Spirit Rise", "Body Move",
+  "Love Song", "Hate Letter", "Joy Ride", "Sad Tale", "Happy Ending",
+  "First Light", "Last Dance", "New Dawn", "Old Memory", "Future Past",
+  "Silent Night", "Loud Day", "Quiet Storm", "Noisy Peace", "Calm Chaos",
+  "Fast Lane", "Slow Motion", "Quick Step", "Lazy Sunday", "Busy Monday",
+  "Red Alert", "Blue Monday", "Green Light", "Yellow Brick", "Purple Haze",
+  "White Noise", "Black Magic", "Grey Area", "Pink Floyd", "Orange Crush",
+  "Sweet Dreams", "Bitter End", "Sour Note", "Salty Sea", "Spicy Life",
+  "Cool Breeze", "Warm Heart", "Hot Summer", "Cold Winter", "Mild Spring",
+  "High Tide", "Low Key", "Deep Dive", "Shallow End", "Wide Open",
+];
+
+const artistNames = [
+  "Ambient Waves", "Synthwave Runner", "Chill Collective", "Beat Masters", "Cosmic Keys",
+  "Nature Sounds", "Future Bass", "Jazz Ensemble", "Classical Touch", "Rock Legends",
+  "Pop Stars", "Hip Hop Crew", "R&B Vibes", "Folk Tales", "World Music",
+  "Electronic Dreams", "Digital Artists", "Analog Band", "Vinyl Spinners", "CD Players",
+  "The Frequencies", "Sound Waves", "Audio Visual", "Stereo Hearts", "Mono Tone",
+];
+
+const albumNames = [
+  "Cosmic Journey", "Midnight Drive", "Summer Vibes", "City Nights", "Galaxy Dreams",
+  "Peaceful Moments", "Digital Age", "Late Night Sessions", "Morning Coffee", "Evening Walk",
+  "Weekend Escape", "Holiday Special", "Anniversary Edition", "Greatest Hits", "New Release",
+  "Debut Album", "Sophomore Effort", "Third Time Lucky", "Fourth Dimension", "Fifth Element",
+];
+
+// Audio URLs from SoundHelix (royalty-free)
+const audioUrls = [
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3",
+];
+
+// Generate 120 sample tracks
+export const sampleTracks: Track[] = Array.from({ length: 120 }, (_, i) => ({
+  id: String(i + 1),
+  title: trackNames[i % trackNames.length],
+  artist: artistNames[i % artistNames.length],
+  album: albumNames[i % albumNames.length],
+  duration: 150 + Math.floor(Math.random() * 180), // 2:30 to 5:30
+  coverUrl: coverImages[i % coverImages.length],
+  audioUrl: audioUrls[i % audioUrls.length],
+}));
 
 export const samplePlaylists: Playlist[] = [
   {
@@ -99,27 +117,55 @@ export const samplePlaylists: Playlist[] = [
     name: "Chill Vibes",
     description: "Relaxing tracks for your peaceful moments",
     coverUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&h=400&fit=crop",
-    tracks: [sampleTracks[0], sampleTracks[2], sampleTracks[5]],
+    tracks: sampleTracks.slice(0, 15),
   },
   {
     id: "pl-2",
     name: "Night Drive",
     description: "Perfect beats for late night adventures",
     coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
-    tracks: [sampleTracks[1], sampleTracks[3], sampleTracks[6]],
+    tracks: sampleTracks.slice(15, 30),
   },
   {
     id: "pl-3",
     name: "Focus Mode",
     description: "Concentrate and get things done",
     coverUrl: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=400&fit=crop",
-    tracks: [sampleTracks[4], sampleTracks[7], sampleTracks[0]],
+    tracks: sampleTracks.slice(30, 45),
   },
   {
     id: "pl-4",
     name: "Party Mix",
     description: "Get the energy going",
     coverUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=400&fit=crop",
-    tracks: sampleTracks,
+    tracks: sampleTracks.slice(45, 60),
+  },
+  {
+    id: "pl-5",
+    name: "Morning Coffee",
+    description: "Start your day right",
+    coverUrl: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(60, 75),
+  },
+  {
+    id: "pl-6",
+    name: "Workout Energy",
+    description: "Power through your exercise",
+    coverUrl: "https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(75, 90),
+  },
+  {
+    id: "pl-7",
+    name: "Study Session",
+    description: "Background music for learning",
+    coverUrl: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(90, 105),
+  },
+  {
+    id: "pl-8",
+    name: "Weekend Vibes",
+    description: "Relax and unwind",
+    coverUrl: "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(105, 120),
   },
 ];
