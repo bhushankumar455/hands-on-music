@@ -16,6 +16,7 @@ interface AudioPlayerState {
   likedTracks: Set<string>;
   recentlyPlayed: Track[];
   audioData: number[];
+  playbackSpeed: number;
 }
 
 export function useAudioPlayer() {
@@ -40,6 +41,7 @@ export function useAudioPlayer() {
     likedTracks: new Set(),
     recentlyPlayed: [],
     audioData: new Array(32).fill(0),
+    playbackSpeed: 1,
   });
 
   // Audio visualization
@@ -318,6 +320,13 @@ export function useAudioPlayer() {
     return sampleTracks.filter(track => state.likedTracks.has(track.id));
   }, [state.likedTracks]);
 
+  const setPlaybackSpeed = useCallback((speed: number) => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = speed;
+      setState(prev => ({ ...prev, playbackSpeed: speed }));
+    }
+  }, []);
+
   return {
     ...state,
     play,
@@ -335,5 +344,6 @@ export function useAudioPlayer() {
     addToQueue,
     removeFromQueue,
     getLikedTracks,
+    setPlaybackSpeed,
   };
 }
