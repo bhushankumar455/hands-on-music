@@ -166,6 +166,7 @@ const Index = () => {
                   isShuffled={player.isShuffled}
                   repeatMode={player.repeatMode}
                   isLiked={player.isLiked}
+                  audioData={player.audioData}
                   onTogglePlay={player.togglePlay}
                   onNext={player.next}
                   onPrevious={player.previous}
