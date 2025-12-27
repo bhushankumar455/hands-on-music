@@ -1,28 +1,27 @@
 import { useState, useCallback } from "react";
-import { useAudioPlayer } from "@/hooks/useAudioPlayer";
-import { NowPlaying } from "@/components/player/NowPlaying";
+import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
+import { YouTubeNowPlaying } from "@/components/player/YouTubeNowPlaying";
 import { GestureControls } from "@/components/gesture/GestureControls";
 import { HandTracking } from "@/components/gesture/HandTracking";
 import { GestureFeedback } from "@/components/gesture/GestureFeedback";
-import { QueueView } from "@/components/player/QueueView";
-import { SearchView } from "@/components/player/SearchView";
-import { LikedTracksView } from "@/components/player/LikedTracksView";
-import { AudioVisualizer } from "@/components/player/AudioVisualizer";
-import { samplePlaylists } from "@/data/sampleTracks";
+import { youtubePlaylistsData, allYouTubeTracks, YouTubeTrack } from "@/data/youtubeTracks";
 import { Play, Music, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GestureType } from "@/hooks/useHandTracking";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type View = "playing" | "playlists" | "queue" | "search" | "liked";
 
 const Index = () => {
-  const player = useAudioPlayer();
+  const player = useYouTubePlayer();
   const [activeGesture, setActiveGesture] = useState<GestureType>(null);
   const [currentView, setCurrentView] = useState<View>("playing");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleGesture = useCallback((gesture: GestureType) => {
     if (!gesture) return;
@@ -33,10 +32,11 @@ const Index = () => {
     switch (gesture) {
       case "tap":
         player.togglePlay();
+        toast({ title: player.isPlaying ? "Paused" : "Playing" });
         break;
       case "swipe-left":
         player.previous();
-        toast({ title: "Previous Track", description: player.currentTrack?.title });
+        toast({ title: "Previous Track" });
         break;
       case "swipe-right":
         player.next();
@@ -44,29 +44,37 @@ const Index = () => {
         break;
       case "swipe-up":
         player.setVolume(Math.min(1, player.volume + 0.15));
-        toast({ title: "Volume Up", description: `${Math.round(player.volume * 100)}%` });
+        toast({ title: "Volume Up", description: `${Math.round(player.volume * 100 + 15)}%` });
         break;
       case "swipe-down":
         player.setVolume(Math.max(0, player.volume - 0.15));
-        toast({ title: "Volume Down", description: `${Math.round(player.volume * 100)}%` });
+        toast({ title: "Volume Down", description: `${Math.round(Math.max(0, player.volume * 100 - 15))}%` });
         break;
       case "double-tap":
         player.toggleLike();
-        toast({ title: player.isLiked ? "Removed from Liked" : "Added to Liked" });
+        toast({ title: player.isLiked ? "Removed from Liked" : "Added to Liked ❤️" });
         break;
       case "pinch":
         player.toggleMute();
-        toast({ title: player.isMuted ? "Unmuted" : "Muted" });
+        toast({ title: player.isMuted ? "Unmuted" : "Muted 🔇" });
         break;
       case "open-palm":
         player.pause();
+        toast({ title: "Paused ✋" });
         break;
       case "thumbs-up":
         if (!player.isLiked) player.toggleLike();
-        toast({ title: "👍 Great choice!" });
+        toast({ title: "👍 Liked!" });
         break;
     }
   }, [player]);
+
+  const filteredTracks = searchQuery.trim() 
+    ? allYouTubeTracks.filter(track => 
+        track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        track.artist.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   const navItems = [
     { id: "playing" as View, icon: Play, label: "Now Playing" },
@@ -75,6 +83,12 @@ const Index = () => {
     { id: "search" as View, icon: Search, label: "Search" },
     { id: "liked" as View, icon: Heart, label: "Liked Songs" },
   ];
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground dark">
@@ -120,6 +134,7 @@ const Index = () => {
               <Music className="h-6 w-6" />
               GesturePlay
             </h1>
+            <p className="text-xs text-muted-foreground mt-1">Hindi & Hollywood Hits</p>
           </div>
           
           <nav className="flex-1 p-4 space-y-1">
@@ -138,16 +153,22 @@ const Index = () => {
             ))}
           </nav>
 
-          {/* Mini Player with Visualizer */}
+          {/* Mini Player */}
           {player.currentTrack && (
-            <div className="p-4 border-t border-border space-y-3">
-              <AudioVisualizer audioData={player.audioData} isPlaying={player.isPlaying} />
+            <div className="p-4 border-t border-border">
               <div className="flex items-center gap-3">
                 <img src={player.currentTrack.coverUrl} alt="" className="w-12 h-12 rounded-lg object-cover" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate text-sm">{player.currentTrack.title}</p>
                   <p className="text-xs text-muted-foreground truncate">{player.currentTrack.artist}</p>
                 </div>
+                {player.isPlaying && (
+                  <div className="flex items-center gap-0.5">
+                    <div className="w-0.5 h-3 bg-primary animate-pulse" />
+                    <div className="w-0.5 h-4 bg-primary animate-pulse delay-75" />
+                    <div className="w-0.5 h-2 bg-primary animate-pulse delay-150" />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -157,7 +178,7 @@ const Index = () => {
         <main className="flex-1 flex flex-col lg:flex-row overflow-hidden pt-16 lg:pt-0">
           <div className="flex-1 overflow-auto">
             {currentView === "playing" && (
-              <NowPlaying
+              <YouTubeNowPlaying
                 currentTrack={player.currentTrack}
                 isPlaying={player.isPlaying}
                 currentTime={player.currentTime}
@@ -167,6 +188,8 @@ const Index = () => {
                 isShuffled={player.isShuffled}
                 repeatMode={player.repeatMode}
                 isLiked={player.isLiked}
+                onReady={player.onReady}
+                onStateChange={player.onStateChange}
                 onTogglePlay={player.togglePlay}
                 onNext={player.next}
                 onPrevious={player.previous}
@@ -178,39 +201,165 @@ const Index = () => {
                 onToggleLike={player.toggleLike}
               />
             )}
+            
             {currentView === "playlists" && (
               <div className="p-6">
                 <h2 className="text-2xl font-bold mb-6">Playlists</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {samplePlaylists.map((playlist) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {youtubePlaylistsData.map((playlist) => (
                     <button
                       key={playlist.id}
-                      onClick={() => { player.playTrack(playlist.tracks[0], playlist.tracks); setCurrentView("playing"); }}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-card hover:bg-secondary transition-colors text-left"
+                      onClick={() => { 
+                        player.playTrack(playlist.tracks[0], playlist.tracks); 
+                        setCurrentView("playing"); 
+                      }}
+                      className="group relative overflow-hidden rounded-xl aspect-square"
                     >
-                      <img src={playlist.coverUrl} alt="" className="w-16 h-16 rounded-lg object-cover" />
-                      <div>
-                        <h3 className="font-semibold">{playlist.name}</h3>
-                        <p className="text-sm text-muted-foreground">{playlist.tracks.length} tracks</p>
+                      <img 
+                        src={playlist.coverUrl} 
+                        alt="" 
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="font-bold text-lg">{playlist.name}</h3>
+                        <p className="text-sm text-muted-foreground">{playlist.tracks.length} songs</p>
+                      </div>
+                      <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Play className="h-6 w-6 text-primary-foreground ml-0.5" fill="currentColor" />
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
             )}
+            
             {currentView === "queue" && (
-              <QueueView
-                queue={player.queue}
-                currentIndex={player.queueIndex}
-                onPlayTrack={(track) => player.playTrack(track)}
-                onRemoveFromQueue={player.removeFromQueue}
-              />
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-2">Queue</h2>
+                <p className="text-muted-foreground mb-6">{player.queue.length - player.queueIndex - 1} songs up next</p>
+                
+                <ScrollArea className="h-[calc(100vh-200px)]">
+                  <div className="space-y-2">
+                    {player.queue.map((track, index) => (
+                      <button
+                        key={track.id + "-" + index}
+                        onClick={() => player.playTrack(track)}
+                        className={cn(
+                          "w-full flex items-center gap-4 p-3 rounded-xl text-left transition-colors",
+                          index === player.queueIndex ? "bg-primary/10 border border-primary/20" : "hover:bg-secondary"
+                        )}
+                      >
+                        <span className="w-6 text-center text-muted-foreground text-sm">
+                          {index === player.queueIndex && player.isPlaying ? (
+                            <div className="flex items-center justify-center gap-0.5">
+                              <div className="w-0.5 h-3 bg-primary animate-pulse" />
+                              <div className="w-0.5 h-4 bg-primary animate-pulse delay-75" />
+                            </div>
+                          ) : (
+                            index + 1
+                          )}
+                        </span>
+                        <img src={track.coverUrl} alt="" className="w-12 h-12 rounded object-cover" />
+                        <div className="flex-1 min-w-0">
+                          <p className={cn("font-medium truncate", index === player.queueIndex && "text-primary")}>
+                            {track.title}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{formatDuration(track.duration)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
             )}
+            
             {currentView === "search" && (
-              <SearchView onPlayTrack={player.playTrack} onAddToQueue={player.addToQueue} />
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-6">Search</h2>
+                <div className="relative mb-6">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search songs or artists..."
+                    className="pl-10 h-12 bg-secondary/50 border-0"
+                  />
+                </div>
+                
+                {!searchQuery && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Search for Hindi or Hollywood songs</p>
+                  </div>
+                )}
+                
+                {searchQuery && filteredTracks.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p>No results for "{searchQuery}"</p>
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  {filteredTracks.map((track) => (
+                    <button
+                      key={track.id}
+                      onClick={() => { player.playTrack(track, allYouTubeTracks); setCurrentView("playing"); }}
+                      className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors text-left"
+                    >
+                      <img src={track.coverUrl} alt="" className="w-14 h-14 rounded object-cover" />
+                      <div className="flex-1">
+                        <p className="font-medium">{track.title}</p>
+                        <p className="text-sm text-muted-foreground">{track.artist}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
+            
             {currentView === "liked" && (
-              <LikedTracksView likedTracks={player.getLikedTracks()} onPlayTrack={player.playTrack} />
+              <div className="p-6">
+                <div className="player-gradient rounded-2xl p-8 mb-6">
+                  <div className="flex items-center gap-6">
+                    <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <Heart className="h-16 w-16 text-primary-foreground fill-current" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-primary-foreground/70 uppercase tracking-wider">Playlist</p>
+                      <h2 className="text-3xl font-bold text-primary-foreground">Liked Songs</h2>
+                      <p className="text-primary-foreground/70 mt-2">{player.getLikedTracks().length} songs</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {player.getLikedTracks().length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Songs you like will appear here</p>
+                    <p className="text-sm mt-1">Double-tap to like songs</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {player.getLikedTracks().map((track, index) => (
+                      <button
+                        key={track.id}
+                        onClick={() => player.playTrack(track, player.getLikedTracks())}
+                        className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors text-left"
+                      >
+                        <span className="w-6 text-center text-muted-foreground">{index + 1}</span>
+                        <img src={track.coverUrl} alt="" className="w-12 h-12 rounded object-cover" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{track.title}</p>
+                          <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{formatDuration(track.duration)}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -222,7 +371,7 @@ const Index = () => {
                   <Hand className="h-4 w-4 mr-2" />Camera
                 </TabsTrigger>
                 <TabsTrigger value="simulate" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3">
-                  <MousePointer className="h-4 w-4 mr-2" />Simulate
+                  <MousePointer className="h-4 w-4 mr-2" />Touch
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="camera" className="flex-1 mt-0 overflow-hidden">
