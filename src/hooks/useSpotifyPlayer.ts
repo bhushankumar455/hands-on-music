@@ -16,7 +16,7 @@ type SpotifyEmbedController = {
   play: () => void;
   pause: () => void;
   togglePlay: () => void;
-  setVolume: (volume: number) => void;
+  setVolume?: (volume: number) => void;
   getVolume?: () => number;
   seek?: (positionMs: number) => void;
   addListener: (event: string, cb: (e: any) => void) => void;
@@ -99,14 +99,23 @@ export function useSpotifyPlayer() {
       (controller) => {
         controllerRef.current = controller;
 
+        const applyVolume = () => {
+          try {
+            controller.setVolume?.(isMuted ? 0 : volume);
+          } catch {
+            // Some embed versions don't expose setVolume; ignore.
+          }
+        };
+
         controller.addListener("playback_update", (e: any) => {
           // Known fields per Spotify docs: position (ms), duration (ms), isPaused (bool)
           const paused = !!e?.data?.isPaused;
           setIsPlaying(!paused);
         });
 
-        // Ensure current volume state is applied
-        controller.setVolume(isMuted ? 0 : volume);
+        // Apply current volume when ready (and try once immediately)
+        controller.addListener("ready", applyVolume);
+        applyVolume();
       }
     );
   }, [currentSpotifyUri, isMuted, volume]);
@@ -189,14 +198,14 @@ export function useSpotifyPlayer() {
       setIsMuted(false);
     }
 
-    controllerRef.current?.setVolume(isMuted ? 0 : clamped);
+    controllerRef.current?.setVolume?.(isMuted ? 0 : clamped);
   }, [isMuted]);
 
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
       const next = !prev;
       const targetVol = next ? 0 : (volume > 0 ? volume : lastNonZeroVolumeRef.current);
-      controllerRef.current?.setVolume(targetVol);
+      controllerRef.current?.setVolume?.(targetVol);
       return next;
     });
   }, [volume]);
