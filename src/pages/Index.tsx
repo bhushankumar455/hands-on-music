@@ -8,6 +8,7 @@ import { SpeedControl } from "@/components/player/SpeedControl";
 import { KeyboardShortcutsHelp } from "@/components/player/KeyboardShortcutsHelp";
 import { AmbientBackground } from "@/components/player/AmbientBackground";
 import { EqualizerPanel, presets } from "@/components/player/EqualizerPanel";
+import { MiniPlayer } from "@/components/player/MiniPlayer";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { sampleTracks, samplePlaylists } from "@/data/sampleTracks";
 import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Disc3, ChevronRight } from "lucide-react";
@@ -493,6 +494,22 @@ const Index = () => {
           )}
         </aside>
       </main>
+
+      {/* Mini Player - appears when not on "playing" view */}
+      {currentView !== "playing" && player.currentTrack && (
+        <div className="md:hidden">
+          <MiniPlayer
+            currentTrack={player.currentTrack}
+            isPlaying={player.isPlaying}
+            currentTime={player.currentTime}
+            duration={player.duration}
+            onTogglePlay={player.togglePlay}
+            onNext={player.next}
+            onPrevious={player.previous}
+            onExpand={() => setCurrentView("playing")}
+          />
+        </div>
+      )}
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden bg-card/95 backdrop-blur-xl safe-bottom shrink-0">
