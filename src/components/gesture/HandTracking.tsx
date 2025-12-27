@@ -90,12 +90,7 @@ export function HandTracking({
           </div>
         )}
 
-        {/* Gesture indicator overlay */}
-        {gesture && isTracking && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-primary/90 text-primary-foreground font-medium animate-slide-up">
-            {gesture.replace("-", " ").toUpperCase()}
-          </div>
-        )}
+        {/* Gesture indicator removed - handled by parent component */}
 
         {/* Hand position cursor */}
         {handPosition && isTracking && (
