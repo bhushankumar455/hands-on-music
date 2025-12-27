@@ -4,7 +4,7 @@ import { SpotifyNowPlaying } from "@/components/player/SpotifyNowPlaying";
 import { GestureControls } from "@/components/gesture/GestureControls";
 import { HandTracking } from "@/components/gesture/HandTracking";
 import { GestureFeedback } from "@/components/gesture/GestureFeedback";
-import { spotifyPlaylistsData, allSpotifyTracks, SpotifyTrack } from "@/data/spotifyTracks";
+import { spotifyPlaylistsData, allSpotifyTracks } from "@/data/spotifyTracks";
 import { Play, Music, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GestureType } from "@/hooks/useHandTracking";
@@ -186,6 +186,7 @@ const Index = () => {
                 isShuffled={player.isShuffled}
                 repeatMode={player.repeatMode}
                 isLiked={player.isLiked}
+                embedRef={player.embedRef}
                 onTogglePlay={player.togglePlay}
                 onNext={player.next}
                 onPrevious={player.previous}
@@ -370,10 +371,14 @@ const Index = () => {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="camera" className="flex-1 mt-0 overflow-hidden">
-                <HandTracking onGesture={handleGesture} isPlaying={player.isPlaying} isLiked={player.isLiked} isMuted={player.isMuted} />
+                <div className="h-full">
+                  <HandTracking onGesture={handleGesture} isPlaying={player.isPlaying} isLiked={player.isLiked} isMuted={player.isMuted} />
+                </div>
               </TabsContent>
               <TabsContent value="simulate" className="flex-1 mt-0 overflow-hidden">
-                <GestureControls onGesture={handleGesture} isPlaying={player.isPlaying} isLiked={player.isLiked} isMuted={player.isMuted} />
+                <div className="h-full">
+                  <GestureControls onGesture={handleGesture} isPlaying={player.isPlaying} isLiked={player.isLiked} isMuted={player.isMuted} />
+                </div>
               </TabsContent>
             </Tabs>
           </aside>

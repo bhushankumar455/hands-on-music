@@ -12,6 +12,7 @@ interface SpotifyNowPlayingProps {
   isShuffled: boolean;
   repeatMode: "off" | "all" | "one";
   isLiked: boolean;
+  embedRef: React.RefObject<HTMLDivElement>;
   onTogglePlay: () => void;
   onNext: () => void;
   onPrevious: () => void;
@@ -30,6 +31,7 @@ export function SpotifyNowPlaying({
   isShuffled,
   repeatMode,
   isLiked,
+  embedRef,
   onTogglePlay,
   onNext,
   onPrevious,
@@ -48,8 +50,7 @@ export function SpotifyNowPlaying({
     );
   }
 
-  // Spotify Embed URL
-  const embedUrl = `https://open.spotify.com/embed/track/${currentTrack.spotifyUri}?utm_source=generator&theme=0`;
+  const spotifyWebUrl = `https://open.spotify.com/track/${currentTrack.spotifyUri}`;
 
   return (
     <div className="flex flex-col h-full px-4 py-6 md:px-8 md:py-12 max-w-4xl mx-auto">
@@ -59,7 +60,7 @@ export function SpotifyNowPlaying({
         <div className="relative aspect-square rounded-2xl overflow-hidden album-shadow">
           <img 
             src={currentTrack.coverUrl} 
-            alt={currentTrack.album}
+            alt={`${currentTrack.title} album art`}
             className={cn(
               "w-full h-full object-cover transition-transform duration-700",
               isPlaying && "scale-105"
@@ -90,18 +91,17 @@ export function SpotifyNowPlaying({
         <p className="text-muted-foreground/60 text-sm">
           {currentTrack.album}
         </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          If you can’t hear audio, click Play once (browsers block autoplay).
+          <a className="ml-2 underline underline-offset-4 hover:text-foreground" href={spotifyWebUrl} target="_blank" rel="noreferrer">
+            Open in Spotify
+          </a>
+        </p>
       </div>
 
-      {/* Spotify Embed Player (Hidden for audio) */}
-      <div className="w-full h-20 rounded-xl overflow-hidden mb-6 bg-card/50">
-        <iframe
-          src={embedUrl}
-          width="100%"
-          height="80"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"
-          className="rounded-xl"
-        />
+      {/* Spotify Player */}
+      <div className="w-full rounded-xl overflow-hidden mb-6 bg-card/50 border border-border">
+        <div ref={embedRef} className="w-full" style={{ height: 152 }} />
       </div>
 
       {/* Playback Controls */}
