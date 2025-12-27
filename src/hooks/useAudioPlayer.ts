@@ -14,10 +14,16 @@ interface AudioPlayerState {
   queueIndex: number;
   isLiked: boolean;
   likedTracks: Set<string>;
+  recentlyPlayed: Track[];
+  audioData: number[];
 }
 
 export function useAudioPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const animationRef = useRef<number>(0);
   
   const [state, setState] = useState<AudioPlayerState>({
     isPlaying: false,
@@ -32,12 +38,39 @@ export function useAudioPlayer() {
     queueIndex: 0,
     isLiked: false,
     likedTracks: new Set(),
+    recentlyPlayed: [],
+    audioData: new Array(32).fill(0),
   });
 
-  // Initialize audio element
+  // Audio visualization
+  const updateAudioData = useCallback(() => {
+    if (analyserRef.current && state.isPlaying) {
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+      analyserRef.current.getByteFrequencyData(dataArray);
+      
+      // Downsample to 32 bars
+      const bars = 32;
+      const step = Math.floor(dataArray.length / bars);
+      const normalizedData = [];
+      
+      for (let i = 0; i < bars; i++) {
+        let sum = 0;
+        for (let j = 0; j < step; j++) {
+          sum += dataArray[i * step + j];
+        }
+        normalizedData.push((sum / step) / 255);
+      }
+      
+      setState(prev => ({ ...prev, audioData: normalizedData }));
+    }
+    animationRef.current = requestAnimationFrame(updateAudioData);
+  }, [state.isPlaying]);
+
+  // Initialize audio element and analyzer
   useEffect(() => {
     audioRef.current = new Audio();
     audioRef.current.volume = state.volume;
+    audioRef.current.crossOrigin = "anonymous";
     
     const audio = audioRef.current;
 
@@ -53,15 +86,47 @@ export function useAudioPlayer() {
       handleNext();
     };
 
+    const handlePlay = () => {
+      // Setup audio context for visualization on first play
+      if (!audioContextRef.current) {
+        try {
+          audioContextRef.current = new AudioContext();
+          analyserRef.current = audioContextRef.current.createAnalyser();
+          analyserRef.current.fftSize = 256;
+          
+          sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
+          sourceRef.current.connect(analyserRef.current);
+          analyserRef.current.connect(audioContextRef.current.destination);
+        } catch (err) {
+          console.log("Audio context not available for visualization");
+        }
+      }
+      
+      if (audioContextRef.current?.state === "suspended") {
+        audioContextRef.current.resume();
+      }
+      
+      animationRef.current = requestAnimationFrame(updateAudioData);
+    };
+
+    const handlePause = () => {
+      cancelAnimationFrame(animationRef.current);
+    };
+
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
 
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
       audio.pause();
+      cancelAnimationFrame(animationRef.current);
     };
   }, []);
 
@@ -70,6 +135,13 @@ export function useAudioPlayer() {
     if (audioRef.current && state.currentTrack) {
       audioRef.current.src = state.currentTrack.audioUrl;
       audioRef.current.load();
+      
+      // Add to recently played
+      setState(prev => {
+        const newRecent = [state.currentTrack!, ...prev.recentlyPlayed.filter(t => t.id !== state.currentTrack!.id)].slice(0, 10);
+        return { ...prev, recentlyPlayed: newRecent };
+      });
+      
       if (state.isPlaying) {
         audioRef.current.play().catch(console.error);
       }
@@ -227,6 +299,25 @@ export function useAudioPlayer() {
     }
   }, []);
 
+  const addToQueue = useCallback((track: Track) => {
+    setState(prev => ({
+      ...prev,
+      queue: [...prev.queue, track],
+    }));
+  }, []);
+
+  const removeFromQueue = useCallback((index: number) => {
+    setState(prev => ({
+      ...prev,
+      queue: prev.queue.filter((_, i) => i !== index),
+      queueIndex: index < prev.queueIndex ? prev.queueIndex - 1 : prev.queueIndex,
+    }));
+  }, []);
+
+  const getLikedTracks = useCallback(() => {
+    return sampleTracks.filter(track => state.likedTracks.has(track.id));
+  }, [state.likedTracks]);
+
   return {
     ...state,
     play,
@@ -241,5 +332,8 @@ export function useAudioPlayer() {
     toggleRepeat,
     toggleLike,
     playTrack,
+    addToQueue,
+    removeFromQueue,
+    getLikedTracks,
   };
 }

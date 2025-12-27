@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GestureType } from "./GestureControls";
+import { GestureType } from "@/hooks/useHandTracking";
 import { cn } from "@/lib/utils";
 import { 
   SkipBack, 
@@ -10,15 +10,19 @@ import {
   VolumeX,
   Heart,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Hand,
+  ThumbsUp
 } from "lucide-react";
 
 interface GestureFeedbackProps {
-  gesture: GestureType | null;
+  gesture: GestureType;
   action?: string;
 }
 
-const gestureIcons: Record<GestureType, React.ReactNode> = {
+type NonNullGesture = Exclude<GestureType, null>;
+
+const gestureIcons: Record<NonNullGesture, React.ReactNode> = {
   "swipe-left": <SkipBack className="h-12 w-12" />,
   "swipe-right": <SkipForward className="h-12 w-12" />,
   "tap": <Play className="h-12 w-12" />,
@@ -26,9 +30,11 @@ const gestureIcons: Record<GestureType, React.ReactNode> = {
   "swipe-down": <ChevronDown className="h-12 w-12" />,
   "double-tap": <Heart className="h-12 w-12" />,
   "pinch": <VolumeX className="h-12 w-12" />,
+  "open-palm": <Hand className="h-12 w-12" />,
+  "thumbs-up": <ThumbsUp className="h-12 w-12" />,
 };
 
-const gestureLabels: Record<GestureType, string> = {
+const gestureLabels: Record<NonNullGesture, string> = {
   "swipe-left": "Previous Track",
   "swipe-right": "Next Track",
   "tap": "Play/Pause",
@@ -36,11 +42,13 @@ const gestureLabels: Record<GestureType, string> = {
   "swipe-down": "Volume Down",
   "double-tap": "Like",
   "pinch": "Mute/Unmute",
+  "open-palm": "Stop",
+  "thumbs-up": "Great!",
 };
 
 export function GestureFeedback({ gesture, action }: GestureFeedbackProps) {
   const [visible, setVisible] = useState(false);
-  const [currentGesture, setCurrentGesture] = useState<GestureType | null>(null);
+  const [currentGesture, setCurrentGesture] = useState<NonNullGesture | null>(null);
 
   useEffect(() => {
     if (gesture) {
