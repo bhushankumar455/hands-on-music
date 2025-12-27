@@ -2,6 +2,7 @@ import { Track } from "@/data/sampleTracks";
 import { PlaybackControls } from "./PlaybackControls";
 import { ProgressBar } from "./ProgressBar";
 import { VolumeControl } from "./VolumeControl";
+import { AudioEqualizer } from "./AudioEqualizer";
 import { cn } from "@/lib/utils";
 
 interface NowPlayingProps {
@@ -14,6 +15,7 @@ interface NowPlayingProps {
   isShuffled: boolean;
   repeatMode: "off" | "all" | "one";
   isLiked: boolean;
+  audioData?: number[];
   onTogglePlay: () => void;
   onNext: () => void;
   onPrevious: () => void;
@@ -35,6 +37,7 @@ export function NowPlaying({
   isShuffled,
   repeatMode,
   isLiked,
+  audioData = [],
   onTogglePlay,
   onNext,
   onPrevious,
@@ -46,9 +49,9 @@ export function NowPlaying({
   onToggleLike,
 }: NowPlayingProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 py-8 max-w-md mx-auto">
+    <div className="flex flex-col items-center justify-center h-full px-6 py-6 max-w-md mx-auto">
       {/* Album Art */}
-      <div className="w-full max-w-[260px] sm:max-w-[300px] mb-8 relative">
+      <div className="w-full max-w-[240px] sm:max-w-[280px] mb-4 relative">
         <div className={cn(
           "aspect-square rounded-3xl overflow-hidden album-shadow",
           isPlaying && "player-glow"
@@ -64,11 +67,19 @@ export function NowPlaying({
         </div>
         
         {/* Vinyl hole effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/90 shadow-inner pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/90 shadow-inner pointer-events-none" />
+      </div>
+
+      {/* Audio Equalizer */}
+      <div className="w-full max-w-[300px] mb-4">
+        <AudioEqualizer 
+          audioData={audioData} 
+          isPlaying={isPlaying} 
+        />
       </div>
 
       {/* Track Info */}
-      <div className="text-center mb-6 w-full">
+      <div className="text-center mb-4 w-full">
         <h2 className="text-xl sm:text-2xl font-bold mb-1 truncate animate-fade-in" key={currentTrack?.id}>
           {currentTrack?.title || "No Track Selected"}
         </h2>
@@ -81,7 +92,7 @@ export function NowPlaying({
       </div>
 
       {/* Progress */}
-      <div className="w-full mb-6">
+      <div className="w-full mb-5">
         <ProgressBar
           currentTime={currentTime}
           duration={duration || currentTrack?.duration || 0}
@@ -104,7 +115,7 @@ export function NowPlaying({
       />
 
       {/* Volume - Desktop only */}
-      <div className="mt-8 hidden sm:block">
+      <div className="mt-6 hidden sm:block">
         <VolumeControl
           volume={volume}
           isMuted={isMuted}
