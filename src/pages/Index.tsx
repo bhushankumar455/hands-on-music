@@ -4,13 +4,12 @@ import { NowPlaying } from "@/components/player/NowPlaying";
 import { GestureControls } from "@/components/gesture/GestureControls";
 import { HandTracking } from "@/components/gesture/HandTracking";
 import { sampleTracks, samplePlaylists } from "@/data/sampleTracks";
-import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Menu, X, Headphones, ChevronLeft } from "lucide-react";
+import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Disc3, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GestureType } from "@/hooks/useHandTracking";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type View = "playing" | "playlists" | "queue" | "search" | "liked" | "gestures";
 
@@ -18,45 +17,25 @@ const Index = () => {
   const player = useAudioPlayer();
   const [activeGesture, setActiveGesture] = useState<GestureType>(null);
   const [currentView, setCurrentView] = useState<View>("playing");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [gestureMode, setGestureMode] = useState<"hand" | "mouse">("mouse");
   const [showGesturePanel, setShowGesturePanel] = useState(true);
 
   const handleGesture = useCallback((gesture: GestureType) => {
     if (!gesture) return;
-    
     setActiveGesture(gesture);
     setTimeout(() => setActiveGesture(null), 800);
 
     switch (gesture) {
-      case "tap":
-        player.togglePlay();
-        break;
-      case "swipe-left":
-        player.previous();
-        break;
-      case "swipe-right":
-        player.next();
-        break;
-      case "swipe-up":
-        player.setVolume(Math.min(1, player.volume + 0.15));
-        break;
-      case "swipe-down":
-        player.setVolume(Math.max(0, player.volume - 0.15));
-        break;
-      case "double-tap":
-        player.toggleLike();
-        break;
-      case "pinch":
-        player.toggleMute();
-        break;
-      case "open-palm":
-        player.pause();
-        break;
-      case "thumbs-up":
-        if (!player.isLiked) player.toggleLike();
-        break;
+      case "tap": player.togglePlay(); break;
+      case "swipe-left": player.previous(); break;
+      case "swipe-right": player.next(); break;
+      case "swipe-up": player.setVolume(Math.min(1, player.volume + 0.15)); break;
+      case "swipe-down": player.setVolume(Math.max(0, player.volume - 0.15)); break;
+      case "double-tap": player.toggleLike(); break;
+      case "pinch": player.toggleMute(); break;
+      case "open-palm": player.pause(); break;
+      case "thumbs-up": if (!player.isLiked) player.toggleLike(); break;
     }
   }, [player]);
 
@@ -68,15 +47,6 @@ const Index = () => {
       )
     : [];
 
-  const navItems = [
-    { id: "playing" as View, icon: Play, label: "Now Playing" },
-    { id: "playlists" as View, icon: ListMusic, label: "Playlists" },
-    { id: "queue" as View, icon: List, label: "Queue" },
-    { id: "search" as View, icon: Search, label: "Search" },
-    { id: "liked" as View, icon: Heart, label: "Liked" },
-    { id: "gestures" as View, icon: Hand, label: "Gestures" },
-  ];
-
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -85,118 +55,107 @@ const Index = () => {
 
   const likedTracks = player.getLikedTracks();
 
+  const navItems = [
+    { id: "playing" as View, icon: Disc3, label: "Playing" },
+    { id: "search" as View, icon: Search, label: "Search" },
+    { id: "playlists" as View, icon: ListMusic, label: "Library" },
+    { id: "liked" as View, icon: Heart, label: "Liked" },
+    { id: "gestures" as View, icon: Hand, label: "Gesture" },
+  ];
+
   return (
-    <div className="min-h-screen bg-background text-foreground dark">
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border">
-        <div className="flex items-center justify-between p-3">
-          <div className="flex items-center gap-2">
-            <Headphones className="h-5 w-5 text-primary" />
-            <span className="font-bold text-lg">AIMusicPlay</span>
-          </div>
-          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
-        
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="absolute top-full left-0 right-0 bg-card border-b border-border p-2 shadow-lg">
-            <div className="grid grid-cols-3 gap-2">
-              {navItems.map(({ id, icon: Icon, label }) => (
-                <button
-                  key={id}
-                  onClick={() => { setCurrentView(id); setMobileMenuOpen(false); }}
-                  className={cn(
-                    "flex flex-col items-center gap-1 p-3 rounded-lg transition-colors text-xs",
-                    currentView === id ? "bg-primary/20 text-primary" : "hover:bg-secondary"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </nav>
-        )}
-      </header>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-inset-bottom">
-        <div className="flex justify-around py-2">
-          {navItems.slice(0, 5).map(({ id, icon: Icon, label }) => (
-            <button
-              key={id}
-              onClick={() => setCurrentView(id)}
-              className={cn(
-                "flex flex-col items-center gap-0.5 p-2 rounded-lg transition-colors min-w-[60px]",
-                currentView === id ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="text-[10px]">{label.split(" ")[0]}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
-
-      <div className="flex h-screen">
+    <div className="h-screen w-screen overflow-hidden bg-background text-foreground dark flex flex-col">
+      {/* Main Content */}
+      <main className="flex-1 flex overflow-hidden">
         {/* Desktop Sidebar */}
-        <aside className="w-56 xl:w-64 bg-card border-r border-border hidden lg:flex flex-col shrink-0">
-          <div className="p-4 xl:p-6">
-            <h1 className="text-xl xl:text-2xl font-bold text-primary flex items-center gap-2">
-              <Headphones className="h-5 w-5 xl:h-6 xl:w-6" />
+        <aside className="w-60 bg-card hidden lg:flex flex-col shrink-0">
+          <div className="p-5">
+            <h1 className="text-xl font-bold text-primary flex items-center gap-2.5">
+              <Disc3 className="h-6 w-6" />
               AIMusicPlay
             </h1>
-            <p className="text-xs text-muted-foreground mt-1 hidden xl:block">Gesture Controlled</p>
           </div>
           
-          <nav className="flex-1 px-3 space-y-1">
+          <nav className="flex-1 px-3 space-y-0.5">
             {navItems.filter(n => n.id !== "gestures").map(({ id, icon: Icon, label }) => (
               <button
                 key={id}
                 onClick={() => setCurrentView(id)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm",
-                  currentView === id ? "bg-primary/15 text-primary font-medium" : "hover:bg-secondary text-foreground"
+                  "nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                  currentView === id 
+                    ? "bg-primary/15 text-primary" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
                 {label}
               </button>
             ))}
           </nav>
 
-          {/* Mini Player in Sidebar */}
+          {/* Queue shortcut */}
+          <div className="px-3 mb-2">
+            <button
+              onClick={() => setCurrentView("queue")}
+              className={cn(
+                "nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                currentView === "queue" 
+                  ? "bg-primary/15 text-primary" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              )}
+            >
+              <List className="h-5 w-5" />
+              Queue
+              <span className="ml-auto text-xs bg-secondary px-2 py-0.5 rounded-full">
+                {player.queue.length}
+              </span>
+            </button>
+          </div>
+
+          {/* Mini Player */}
           {player.currentTrack && (
-            <div className="p-3 border-t border-border">
+            <div className="p-3 border-t border-border/50">
               <button 
                 onClick={() => setCurrentView("playing")}
-                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors"
+                className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/50 transition-colors"
               >
-                <img src={player.currentTrack.coverUrl} alt="" className="w-10 h-10 rounded object-cover" />
+                <div className="relative">
+                  <img 
+                    src={player.currentTrack.coverUrl} 
+                    alt="" 
+                    className={cn(
+                      "w-11 h-11 rounded-lg object-cover",
+                      player.isPlaying && "animate-pulse-soft"
+                    )} 
+                  />
+                  {player.isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
+                      <div className="flex items-end gap-0.5 h-4">
+                        <div className="w-0.5 h-2 bg-primary animate-pulse" />
+                        <div className="w-0.5 h-3 bg-primary animate-pulse" style={{ animationDelay: "75ms" }} />
+                        <div className="w-0.5 h-4 bg-primary animate-pulse" style={{ animationDelay: "150ms" }} />
+                        <div className="w-0.5 h-2 bg-primary animate-pulse" style={{ animationDelay: "225ms" }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="font-medium truncate text-sm">{player.currentTrack.title}</p>
                   <p className="text-xs text-muted-foreground truncate">{player.currentTrack.artist}</p>
                 </div>
-                {player.isPlaying && (
-                  <div className="flex items-center gap-0.5">
-                    <div className="w-0.5 h-2 bg-primary animate-pulse" />
-                    <div className="w-0.5 h-3 bg-primary animate-pulse" style={{ animationDelay: "75ms" }} />
-                    <div className="w-0.5 h-2 bg-primary animate-pulse" style={{ animationDelay: "150ms" }} />
-                  </div>
-                )}
               </button>
             </div>
           )}
         </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 flex flex-col overflow-hidden pt-14 pb-16 lg:pt-0 lg:pb-0">
-          <div className="flex-1 overflow-auto">
-            {/* Now Playing View */}
+        {/* Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Content */}
+          <div className="flex-1 overflow-auto scrollbar-hide pb-20 lg:pb-0">
+            {/* Now Playing */}
             {currentView === "playing" && (
-              <div className="h-full">
+              <div className="h-full animate-fade-in">
                 <NowPlaying
                   currentTrack={player.currentTrack}
                   isPlaying={player.isPlaying}
@@ -220,11 +179,11 @@ const Index = () => {
               </div>
             )}
             
-            {/* Playlists View */}
+            {/* Playlists */}
             {currentView === "playlists" && (
-              <div className="p-4 lg:p-6">
-                <h2 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6">Playlists</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
+              <div className="p-4 lg:p-6 animate-fade-in">
+                <h2 className="text-2xl font-bold mb-5">Your Library</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                   {samplePlaylists.map((playlist) => (
                     <button
                       key={playlist.id}
@@ -232,190 +191,180 @@ const Index = () => {
                         player.playTrack(playlist.tracks[0], playlist.tracks); 
                         setCurrentView("playing"); 
                       }}
-                      className="group relative overflow-hidden rounded-xl aspect-square bg-secondary"
+                      className="group relative overflow-hidden rounded-2xl aspect-square bg-secondary play-button"
                     >
                       <img 
                         src={playlist.coverUrl} 
                         alt={playlist.name}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                        className="w-full h-full object-cover" 
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-2 lg:p-3">
-                        <h3 className="font-semibold text-sm lg:text-base text-white truncate">{playlist.name}</h3>
-                        <p className="text-xs text-white/70">{playlist.tracks.length} songs</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <h3 className="font-bold text-sm text-white truncate">{playlist.name}</h3>
+                        <p className="text-xs text-white/60">{playlist.tracks.length} tracks</p>
                       </div>
-                      <div className="absolute top-2 right-2 w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Play className="h-4 w-4 lg:h-5 lg:w-5 text-primary-foreground ml-0.5" fill="currentColor" />
+                      <div className="absolute top-2 right-2 w-9 h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                        <Play className="h-4 w-4 text-white ml-0.5" fill="currentColor" />
                       </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* All Tracks Section */}
+                <h3 className="text-xl font-bold mt-8 mb-4">All Tracks</h3>
+                <div className="space-y-1">
+                  {sampleTracks.slice(0, 20).map((track, index) => (
+                    <button
+                      key={track.id}
+                      onClick={() => { player.playTrack(track, sampleTracks); setCurrentView("playing"); }}
+                      className="track-item w-full flex items-center gap-3 p-2.5 rounded-xl text-left"
+                    >
+                      <span className="w-5 text-center text-xs text-muted-foreground">{index + 1}</span>
+                      <img src={track.coverUrl} alt="" className="w-11 h-11 rounded-lg object-cover" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{track.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{formatDuration(track.duration)}</span>
                     </button>
                   ))}
                 </div>
               </div>
             )}
             
-            {/* Queue View */}
+            {/* Queue */}
             {currentView === "queue" && (
-              <div className="p-4 lg:p-6 h-full flex flex-col">
-                <div className="mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold">Queue</h2>
-                  <p className="text-sm text-muted-foreground">{player.queue.length} songs</p>
-                </div>
+              <div className="p-4 lg:p-6 animate-fade-in">
+                <h2 className="text-2xl font-bold mb-1">Queue</h2>
+                <p className="text-sm text-muted-foreground mb-5">{player.queue.length} tracks</p>
                 
-                <ScrollArea className="flex-1">
-                  <div className="space-y-1">
-                    {player.queue.map((track, index) => (
-                      <button
-                        key={track.id + "-" + index}
-                        onClick={() => player.playTrack(track)}
-                        className={cn(
-                          "w-full flex items-center gap-3 p-2 lg:p-3 rounded-lg text-left transition-colors",
-                          index === player.queueIndex ? "bg-primary/15" : "hover:bg-secondary"
+                <div className="space-y-1">
+                  {player.queue.map((track, index) => (
+                    <button
+                      key={track.id + "-" + index}
+                      onClick={() => player.playTrack(track)}
+                      className={cn(
+                        "track-item w-full flex items-center gap-3 p-2.5 rounded-xl text-left",
+                        index === player.queueIndex && "bg-primary/10"
+                      )}
+                    >
+                      <span className="w-5 text-center text-xs text-muted-foreground">
+                        {index === player.queueIndex && player.isPlaying ? (
+                          <div className="flex items-center justify-center gap-0.5">
+                            <div className="w-0.5 h-2 bg-primary animate-pulse" />
+                            <div className="w-0.5 h-3 bg-primary animate-pulse" />
+                          </div>
+                        ) : (
+                          index + 1
                         )}
-                      >
-                        <span className="w-6 text-center text-muted-foreground text-xs">
-                          {index === player.queueIndex && player.isPlaying ? (
-                            <div className="flex items-center justify-center gap-0.5">
-                              <div className="w-0.5 h-2 bg-primary animate-pulse" />
-                              <div className="w-0.5 h-3 bg-primary animate-pulse" />
-                            </div>
-                          ) : (
-                            index + 1
-                          )}
-                        </span>
-                        <img src={track.coverUrl} alt="" className="w-10 h-10 rounded object-cover" />
-                        <div className="flex-1 min-w-0">
-                          <p className={cn("text-sm font-medium truncate", index === player.queueIndex && "text-primary")}>
-                            {track.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground hidden sm:block">{formatDuration(track.duration)}</span>
-                      </button>
-                    ))}
-                  </div>
-                </ScrollArea>
+                      </span>
+                      <img src={track.coverUrl} alt="" className="w-11 h-11 rounded-lg object-cover" />
+                      <div className="flex-1 min-w-0">
+                        <p className={cn("text-sm font-medium truncate", index === player.queueIndex && "text-primary")}>
+                          {track.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{formatDuration(track.duration)}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             
-            {/* Search View */}
+            {/* Search */}
             {currentView === "search" && (
-              <div className="p-4 lg:p-6 h-full flex flex-col">
-                <h2 className="text-xl lg:text-2xl font-bold mb-4">Search</h2>
+              <div className="p-4 lg:p-6 animate-fade-in">
+                <h2 className="text-2xl font-bold mb-5">Search</h2>
                 
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="relative mb-5">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search songs, artists..."
-                    className="pl-9 h-10 bg-secondary border-0"
+                    placeholder="Songs, artists, albums..."
+                    className="pl-10 h-11 bg-secondary border-0 rounded-xl text-sm"
                   />
                 </div>
                 
-                <ScrollArea className="flex-1">
-                  {!searchQuery ? (
-                    <div className="space-y-1">
-                      {sampleTracks.slice(0, 50).map((track) => (
-                        <button
-                          key={track.id}
-                          onClick={() => { player.playTrack(track, sampleTracks); setCurrentView("playing"); }}
-                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors text-left"
-                        >
-                          <img src={track.coverUrl} alt="" className="w-10 h-10 rounded object-cover" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{track.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
-                          </div>
-                          <span className="text-xs text-muted-foreground hidden sm:block">{formatDuration(track.duration)}</span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : filteredTracks.length > 0 ? (
-                    <div className="space-y-1">
-                      {filteredTracks.map((track) => (
-                        <button
-                          key={track.id}
-                          onClick={() => { player.playTrack(track, sampleTracks); setCurrentView("playing"); }}
-                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors text-left"
-                        >
-                          <img src={track.coverUrl} alt="" className="w-10 h-10 rounded object-cover" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{track.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
-                          </div>
-                          <span className="text-xs text-muted-foreground hidden sm:block">{formatDuration(track.duration)}</span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <p>No results for "{searchQuery}"</p>
+                <div className="space-y-1">
+                  {(searchQuery ? filteredTracks : sampleTracks.slice(0, 30)).map((track, index) => (
+                    <button
+                      key={track.id}
+                      onClick={() => { player.playTrack(track, sampleTracks); setCurrentView("playing"); }}
+                      className="track-item w-full flex items-center gap-3 p-2.5 rounded-xl text-left"
+                    >
+                      <img src={track.coverUrl} alt="" className="w-11 h-11 rounded-lg object-cover" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{track.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  ))}
+                  
+                  {searchQuery && filteredTracks.length === 0 && (
+                    <div className="text-center py-16 text-muted-foreground">
+                      <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm">No results for "{searchQuery}"</p>
                     </div>
                   )}
-                </ScrollArea>
+                </div>
               </div>
             )}
             
-            {/* Liked Songs View */}
+            {/* Liked */}
             {currentView === "liked" && (
-              <div className="p-4 lg:p-6 h-full flex flex-col">
-                <div className="mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold">Liked Songs</h2>
-                  <p className="text-sm text-muted-foreground">{likedTracks.length} songs</p>
-                </div>
+              <div className="p-4 lg:p-6 animate-fade-in">
+                <h2 className="text-2xl font-bold mb-1">Liked Songs</h2>
+                <p className="text-sm text-muted-foreground mb-5">{likedTracks.length} tracks</p>
                 
                 {likedTracks.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
-                    <Heart className="h-12 w-12 mb-4 opacity-50" />
-                    <p>No liked songs yet</p>
-                    <p className="text-sm mt-1">Tap the heart to like songs</p>
+                  <div className="text-center py-16 text-muted-foreground">
+                    <Heart className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p className="font-medium">No liked songs yet</p>
+                    <p className="text-sm mt-1">Tap the heart icon to save songs</p>
                   </div>
                 ) : (
-                  <ScrollArea className="flex-1">
-                    <div className="space-y-1">
-                      {likedTracks.map((track) => (
-                        <button
-                          key={track.id}
-                          onClick={() => { player.playTrack(track, likedTracks); setCurrentView("playing"); }}
-                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors text-left"
-                        >
-                          <img src={track.coverUrl} alt="" className="w-10 h-10 rounded object-cover" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{track.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
-                          </div>
-                          <Heart className="h-4 w-4 text-primary shrink-0" fill="currentColor" />
-                        </button>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                  <div className="space-y-1">
+                    {likedTracks.map((track) => (
+                      <button
+                        key={track.id}
+                        onClick={() => { player.playTrack(track, likedTracks); setCurrentView("playing"); }}
+                        className="track-item w-full flex items-center gap-3 p-2.5 rounded-xl text-left"
+                      >
+                        <img src={track.coverUrl} alt="" className="w-11 h-11 rounded-lg object-cover" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{track.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
+                        </div>
+                        <Heart className="h-4 w-4 text-primary shrink-0" fill="currentColor" />
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
 
-            {/* Gestures View (Mobile only) */}
+            {/* Gestures */}
             {currentView === "gestures" && (
-              <div className="h-full flex flex-col">
-                <div className="p-4 border-b border-border flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={() => setCurrentView("playing")}>
-                    <ChevronLeft className="h-5 w-5" />
-                  </Button>
-                  <h2 className="text-lg font-bold">Gesture Controls</h2>
+              <div className="h-full flex flex-col animate-fade-in">
+                <div className="p-4 lg:p-6">
+                  <h2 className="text-2xl font-bold mb-1">Gesture Controls</h2>
+                  <p className="text-sm text-muted-foreground">Control music with gestures</p>
                 </div>
                 
-                <Tabs value={gestureMode} onValueChange={(v) => setGestureMode(v as "hand" | "mouse")} className="flex-1 flex flex-col">
-                  <div className="px-4 py-2">
-                    <TabsList className="w-full">
-                      <TabsTrigger value="mouse" className="flex-1 gap-2">
-                        <MousePointer className="h-4 w-4" />
-                        Touch
-                      </TabsTrigger>
-                      <TabsTrigger value="hand" className="flex-1 gap-2">
-                        <Hand className="h-4 w-4" />
-                        Camera
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
+                <Tabs value={gestureMode} onValueChange={(v) => setGestureMode(v as "hand" | "mouse")} className="flex-1 flex flex-col px-4 lg:px-6">
+                  <TabsList className="w-full max-w-xs h-10 mb-4">
+                    <TabsTrigger value="mouse" className="flex-1 gap-2 text-sm">
+                      <MousePointer className="h-4 w-4" />
+                      Touch
+                    </TabsTrigger>
+                    <TabsTrigger value="hand" className="flex-1 gap-2 text-sm">
+                      <Hand className="h-4 w-4" />
+                      Camera
+                    </TabsTrigger>
+                  </TabsList>
                   
                   <TabsContent value="mouse" className="flex-1 m-0">
                     <GestureControls 
@@ -438,33 +387,37 @@ const Index = () => {
               </div>
             )}
           </div>
-        </main>
+        </div>
 
-        {/* Desktop Gesture Panel - Collapsible */}
+        {/* Desktop Gesture Panel */}
         <aside className={cn(
-          "hidden lg:flex flex-col border-l border-border bg-card transition-all duration-300 shrink-0",
-          showGesturePanel ? "w-72 xl:w-80" : "w-12"
+          "hidden lg:flex flex-col bg-card/50 transition-all duration-300 shrink-0 relative",
+          showGesturePanel ? "w-72" : "w-0"
         )}>
-          {showGesturePanel ? (
+          {showGesturePanel && (
             <>
-              {/* Gesture Feedback Overlay */}
               {activeGesture && (
-                <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                  <div className="px-6 py-3 rounded-full bg-primary/90 text-primary-foreground font-medium animate-pulse">
+                <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center bg-black/20">
+                  <div className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-lg">
                     {activeGesture.replace("-", " ").toUpperCase()}
                   </div>
                 </div>
               )}
               
-              <div className="p-3 border-b border-border flex items-center justify-between">
-                <h2 className="font-semibold">Gestures</h2>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowGesturePanel(false)}>
-                  <X className="h-4 w-4" />
+              <div className="p-4 flex items-center justify-between">
+                <h3 className="font-semibold">Gestures</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setShowGesturePanel(false)}
+                >
+                  ×
                 </Button>
               </div>
               
               <Tabs value={gestureMode} onValueChange={(v) => setGestureMode(v as "hand" | "mouse")} className="flex-1 flex flex-col">
-                <div className="px-3 py-2">
+                <div className="px-4">
                   <TabsList className="w-full h-9">
                     <TabsTrigger value="mouse" className="flex-1 gap-1.5 text-xs">
                       <MousePointer className="h-3.5 w-3.5" />
@@ -496,17 +449,38 @@ const Index = () => {
                 </TabsContent>
               </Tabs>
             </>
-          ) : (
+          )}
+          
+          {!showGesturePanel && (
             <Button 
               variant="ghost" 
-              className="h-full w-full flex flex-col items-center justify-center gap-2"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full h-12 w-8 rounded-l-lg rounded-r-none bg-card/80"
               onClick={() => setShowGesturePanel(true)}
             >
-              <Hand className="h-5 w-5" />
+              <Hand className="h-4 w-4" />
             </Button>
           )}
         </aside>
-      </div>
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden bg-card/95 backdrop-blur-xl safe-bottom shrink-0">
+        <div className="flex justify-around py-2 px-1">
+          {navItems.map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setCurrentView(id)}
+              className={cn(
+                "nav-item flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl min-w-[56px]",
+                currentView === id ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className={cn("h-5 w-5", currentView === id && id === "liked" && "fill-current")} />
+              <span className="text-[10px] font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 };

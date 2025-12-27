@@ -1,8 +1,8 @@
 import { Track } from "@/data/sampleTracks";
-import { AlbumArt } from "./AlbumArt";
 import { PlaybackControls } from "./PlaybackControls";
 import { ProgressBar } from "./ProgressBar";
 import { VolumeControl } from "./VolumeControl";
+import { cn } from "@/lib/utils";
 
 interface NowPlayingProps {
   currentTrack: Track | null;
@@ -46,31 +46,42 @@ export function NowPlaying({
   onToggleLike,
 }: NowPlayingProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-lg mx-auto">
+    <div className="flex flex-col items-center justify-center h-full px-6 py-8 max-w-md mx-auto">
       {/* Album Art */}
-      <div className="w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[360px] mb-6 lg:mb-8">
-        <AlbumArt 
-          track={currentTrack} 
-          isPlaying={isPlaying}
-          className="w-full"
-        />
+      <div className="w-full max-w-[260px] sm:max-w-[300px] mb-8 relative">
+        <div className={cn(
+          "aspect-square rounded-3xl overflow-hidden album-shadow",
+          isPlaying && "player-glow"
+        )}>
+          <img 
+            src={currentTrack?.coverUrl || "https://images.unsplash.com/photo-1614149162883-504ce4d13909?w=400&h=400&fit=crop"} 
+            alt={currentTrack?.title || "Album art"}
+            className={cn(
+              "w-full h-full object-cover transition-transform duration-[20000ms] ease-linear",
+              isPlaying && "animate-spin-album"
+            )}
+          />
+        </div>
+        
+        {/* Vinyl hole effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/90 shadow-inner pointer-events-none" />
       </div>
 
       {/* Track Info */}
-      <div className="text-center mb-4 lg:mb-6 w-full">
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 truncate px-2">
+      <div className="text-center mb-6 w-full">
+        <h2 className="text-xl sm:text-2xl font-bold mb-1 truncate animate-fade-in" key={currentTrack?.id}>
           {currentTrack?.title || "No Track Selected"}
         </h2>
         <p className="text-muted-foreground text-sm sm:text-base truncate">
           {currentTrack?.artist || "Unknown Artist"}
         </p>
-        <p className="text-muted-foreground/60 text-xs sm:text-sm mt-0.5 truncate">
+        <p className="text-muted-foreground/50 text-xs mt-0.5 truncate">
           {currentTrack?.album}
         </p>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full mb-6 lg:mb-8">
+      {/* Progress */}
+      <div className="w-full mb-6">
         <ProgressBar
           currentTime={currentTime}
           duration={duration || currentTrack?.duration || 0}
@@ -78,7 +89,7 @@ export function NowPlaying({
         />
       </div>
 
-      {/* Playback Controls */}
+      {/* Controls */}
       <PlaybackControls
         isPlaying={isPlaying}
         isShuffled={isShuffled}
@@ -92,8 +103,8 @@ export function NowPlaying({
         onToggleLike={onToggleLike}
       />
 
-      {/* Volume Control - Hidden on mobile, shown on tablet+ */}
-      <div className="mt-6 lg:mt-8 hidden sm:block">
+      {/* Volume - Desktop only */}
+      <div className="mt-8 hidden sm:block">
         <VolumeControl
           volume={volume}
           isMuted={isMuted}
