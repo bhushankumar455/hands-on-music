@@ -23,7 +23,7 @@ interface GestureControlsProps {
   isMuted: boolean;
 }
 
-type SimulatedGesture = "swipe-left" | "swipe-right" | "tap" | "swipe-up" | "swipe-down" | "double-tap" | "pinch";
+type SimulatedGesture = "swipe-left" | "swipe-right" | "tap" | "swipe-up" | "swipe-down" | "double-tap" | "pinch" | "pointing" | "open-palm";
 
 interface GestureButton {
   gesture: SimulatedGesture;
@@ -117,26 +117,40 @@ export function GestureControls({
           />
         ))}
 
-        {/* Center tap area */}
-        <button
-          onClick={(e) => handleGesture("tap", e)}
-          className={cn(
-            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-            "w-28 h-28 rounded-full",
-            "bg-primary/10 hover:bg-primary/20",
-            "border-2 border-primary/30 hover:border-primary/50",
-            "flex flex-col items-center justify-center gap-2",
-            "transition-all duration-200",
-            activeGesture === "tap" && "scale-90 bg-primary/30 gesture-glow"
-          )}
-        >
-          {isPlaying ? (
-            <Pause className="h-10 w-10 text-primary" />
-          ) : (
-            <Play className="h-10 w-10 text-primary ml-1" />
-          )}
-          <span className="text-xs text-muted-foreground">Tap to {isPlaying ? "Pause" : "Play"}</span>
-        </button>
+        {/* Center area - Play and Pause buttons */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-4">
+          {/* Play button */}
+          <button
+            onClick={(e) => handleGesture("pointing", e)}
+            className={cn(
+              "w-20 h-20 rounded-full",
+              "bg-primary/10 hover:bg-primary/20",
+              "border-2 border-primary/30 hover:border-primary/50",
+              "flex flex-col items-center justify-center gap-1",
+              "transition-all duration-200",
+              activeGesture === "pointing" && "scale-90 bg-primary/30 gesture-glow"
+            )}
+          >
+            <Play className="h-8 w-8 text-primary ml-1" />
+            <span className="text-[10px] text-muted-foreground">Play</span>
+          </button>
+
+          {/* Pause button */}
+          <button
+            onClick={(e) => handleGesture("open-palm", e)}
+            className={cn(
+              "w-20 h-20 rounded-full",
+              "bg-primary/10 hover:bg-primary/20",
+              "border-2 border-primary/30 hover:border-primary/50",
+              "flex flex-col items-center justify-center gap-1",
+              "transition-all duration-200",
+              activeGesture === "open-palm" && "scale-90 bg-primary/30 gesture-glow"
+            )}
+          >
+            <Pause className="h-8 w-8 text-primary" />
+            <span className="text-[10px] text-muted-foreground">Pause</span>
+          </button>
+        </div>
 
         {/* Directional gesture buttons */}
         {gestureButtons.map((btn) => (
