@@ -198,7 +198,7 @@ const albumNames = [
 
 // Audio URLs from SoundHelix (royalty-free)
 const audioUrls = [
-  "https://soundcloud.com/soundhelix/the-stationary-ark?si=7cacef1a9e244a60b7f94ff1061337e5&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing.mp3",
+  "https://on.soundcloud.com/XToHfTVJE4HJZ4ZNOy.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
