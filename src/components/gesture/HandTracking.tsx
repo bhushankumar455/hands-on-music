@@ -143,8 +143,8 @@ export const HandTracking = forwardRef<HTMLDivElement, HandTrackingProps>(({
             <span>Two Fingers: Play</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-            <span className="text-primary">✊</span>
-            <span>Closed Fist: Pause</span>
+            <span className="text-primary">🖐️</span>
+            <span>Open Palm: Pause</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
             <span className="text-primary">👋</span>

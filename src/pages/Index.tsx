@@ -56,8 +56,8 @@ const Index = () => {
 
     switch (gesture) {
       case "pointing": player.play(); break;
-      case "open-palm": player.play(); break;
-      case "tap": player.pause(); break;
+      case "open-palm": player.pause(); break;
+      case "tap": player.togglePlay(); break;
       case "swipe-left": player.previous(); break;
       case "swipe-right": player.next(); break;
       case "swipe-up": player.setVolume(Math.min(1, player.volume + 0.15)); break;
