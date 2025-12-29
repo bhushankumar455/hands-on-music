@@ -5,8 +5,7 @@ export interface Track {
   album: string;
   duration: number;
   coverUrl: string;
-  audioUrl?: string; // playable mp3 only
-  externalUrl?: string; // SoundCloud / external link
+  audioUrl: string;
 }
 
 export interface Playlist {
@@ -18,79 +17,271 @@ export interface Playlist {
 }
 
 // Generate 100+ sample tracks with variety
+const genres = ["Electronic", "Ambient", "Jazz", "Classical", "Rock", "Pop", "Hip Hop", "R&B", "Folk", "World"];
+const moods = ["Chill", "Energetic", "Melancholic", "Uplifting", "Dreamy", "Intense", "Peaceful", "Groovy"];
 const coverImages = [
   "https://pagalnew.com/coverimages/title-track-dhurandhar-500-500.jpg",
   "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=400&h=400&fit=crop",
   "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=400&fit=crop",
   "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1484755560615-a4c64e778a6c?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1446057032654-9d8885db76c6?w=400&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1526478806334-5fd488fcaabc?w=400&h=400&fit=crop",
 ];
 
-const trackNames = ["Dhurandhar Title Track", "Sunrise Melody", "Ocean Waves", "City Lights"];
+const trackNames = [
+  "Dhurandhar Title Track",
+  "Sunrise Melody",
+  "Ocean Waves",
+  "City Lights",
+  "Forest Walk",
+  "Summer Breeze",
+  "Winter Frost",
+  "Autumn Leaves",
+  "Spring Rain",
+  "Desert Wind",
+  "Mountain Echo",
+  "River Flow",
+  "Starlight",
+  "Moonshine",
+  "Sunset Glow",
+  "Neon Nights",
+  "Electric Soul",
+  "Digital Love",
+  "Analog Heart",
+  "Crystal Clear",
+  "Velvet Sky",
+  "Golden Hour",
+  "Silver Moon",
+  "Bronze Age",
+  "Iron Will",
+  "Cosmic Dance",
+  "Galaxy Spin",
+  "Nebula Dream",
+  "Supernova",
+  "Black Hole",
+  "Time Travel",
+  "Space Walk",
+  "Zero Gravity",
+  "Light Speed",
+  "Warp Drive",
+  "Deep Blue",
+  "Coral Reef",
+  "Tropical Storm",
+  "Hurricane Eye",
+  "Thunder Roll",
+  "Lightning Strike",
+  "Rainbow Bridge",
+  "Cloud Nine",
+  "Heaven Sent",
+  "Earth Bound",
+  "Fire Dance",
+  "Ice Crystal",
+  "Steam Engine",
+  "Wind Chime",
+  "Water Drop",
+  "Soul Search",
+  "Mind Wander",
+  "Heart Beat",
+  "Spirit Rise",
+  "Body Move",
+  "Love Song",
+  "Hate Letter",
+  "Joy Ride",
+  "Sad Tale",
+  "Happy Ending",
+  "First Light",
+  "Last Dance",
+  "New Dawn",
+  "Old Memory",
+  "Future Past",
+  "Silent Night",
+  "Loud Day",
+  "Quiet Storm",
+  "Noisy Peace",
+  "Calm Chaos",
+  "Fast Lane",
+  "Slow Motion",
+  "Quick Step",
+  "Lazy Sunday",
+  "Busy Monday",
+  "Red Alert",
+  "Blue Monday",
+  "Green Light",
+  "Yellow Brick",
+  "Purple Haze",
+  "White Noise",
+  "Black Magic",
+  "Grey Area",
+  "Pink Floyd",
+  "Orange Crush",
+  "Sweet Dreams",
+  "Bitter End",
+  "Sour Note",
+  "Salty Sea",
+  "Spicy Life",
+  "Cool Breeze",
+  "Warm Heart",
+  "Hot Summer",
+  "Cold Winter",
+  "Mild Spring",
+  "High Tide",
+  "Low Key",
+  "Deep Dive",
+  "Shallow End",
+  "Wide Open",
+];
 
-const artistNames = ["Hanumankind, Jasmine Sandlas", "Chill Collective", "Beat Masters", "Cosmic Keys"];
+const artistNames = [
+  "Hanumankind, Jasmine Sandlas",
+  "Synthwave Runner",
+  "Chill Collective",
+  "Beat Masters",
+  "Cosmic Keys",
+  "Nature Sounds",
+  "Future Bass",
+  "Jazz Ensemble",
+  "Classical Touch",
+  "Rock Legends",
+  "Pop Stars",
+  "Hip Hop Crew",
+  "R&B Vibes",
+  "Folk Tales",
+  "World Music",
+  "Electronic Dreams",
+  "Digital Artists",
+  "Analog Band",
+  "Vinyl Spinners",
+  "CD Players",
+  "The Frequencies",
+  "Sound Waves",
+  "Audio Visual",
+  "Stereo Hearts",
+  "Mono Tone",
+];
 
-const albumNames = ["Dhurandhar", "Midnight Drive", "Summer Vibes", "City Nights"];
+const albumNames = [
+  "Dhurandhar ",
+  "Midnight Drive",
+  "Summer Vibes",
+  "City Nights",
+  "Galaxy Dreams",
+  "Peaceful Moments",
+  "Digital Age",
+  "Late Night Sessions",
+  "Morning Coffee",
+  "Evening Walk",
+  "Weekend Escape",
+  "Holiday Special",
+  "Anniversary Edition",
+  "Greatest Hits",
+  "New Release",
+  "Debut Album",
+  "Sophomore Effort",
+  "Third Time Lucky",
+  "Fourth Dimension",
+  "Fifth Element",
+];
 
-// ✅ ONLY REAL MP3 FILES HERE
+// Audio URLs from SoundHelix (royalty-free)
 const audioUrls = [
-  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+  "https://on.soundcloud.com/XToHfTVJE4HJZ4ZNOy.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
+  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3",
 ];
 
-// Generate sample tracks
-export const sampleTracks: Track[] = Array.from({ length: 40 }, (_, i) => {
-  // 🔥 Special handling for Dhurandhar song
-  if (i === 0) {
-    return {
-      id: "1",
-      title: "Dhurandhar Title Track",
-      artist: "Hanumankind, Jasmine Sandlas",
-      album: "Dhurandhar",
-      duration: 0,
-      coverUrl: coverImages[0],
+// Generate 120 sample tracks
+export const sampleTracks: Track[] = Array.from({ length: 120 }, (_, i) => ({
+  id: String(i + 1),
+  title: trackNames[i % trackNames.length],
+  artist: artistNames[i % artistNames.length],
+  album: albumNames[i % albumNames.length],
+  duration: 150 + Math.floor(Math.random() * 180), // 2:30 to 5:30
+  coverUrl: coverImages[i % coverImages.length],
+  audioUrl: audioUrls[i % audioUrls.length],
+}));
 
-      // ✅ PLAYABLE MP3 (demo)
-      audioUrl: audioUrls[0],
-
-      // 🔗 REAL SoundCloud link
-      externalUrl: "https://on.soundcloud.com/XToHfTVJE4HJZ4ZNOy",
-    };
-  }
-
-  return {
-    id: String(i + 1),
-    title: trackNames[i % trackNames.length],
-    artist: artistNames[i % artistNames.length],
-    album: albumNames[i % albumNames.length],
-    duration: 150 + Math.floor(Math.random() * 180),
-    coverUrl: coverImages[i % coverImages.length],
-    audioUrl: audioUrls[i % audioUrls.length],
-  };
-});
-
-// Playlists
 export const samplePlaylists: Playlist[] = [
   {
     id: "pl-1",
     name: "Chill Vibes",
     description: "Relaxing tracks for your peaceful moments",
-    coverUrl: coverImages[1],
-    tracks: sampleTracks.slice(0, 10),
+    coverUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(0, 15),
   },
   {
     id: "pl-2",
     name: "Night Drive",
     description: "Perfect beats for late night adventures",
-    coverUrl: coverImages[2],
-    tracks: sampleTracks.slice(10, 20),
+    coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(15, 30),
   },
   {
     id: "pl-3",
     name: "Focus Mode",
     description: "Concentrate and get things done",
-    coverUrl: coverImages[3],
-    tracks: sampleTracks.slice(20, 30),
+    coverUrl: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(30, 45),
+  },
+  {
+    id: "pl-4",
+    name: "Party Mix",
+    description: "Get the energy going",
+    coverUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(45, 60),
+  },
+  {
+    id: "pl-5",
+    name: "Morning Coffee",
+    description: "Start your day right",
+    coverUrl: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(60, 75),
+  },
+  {
+    id: "pl-6",
+    name: "Workout Energy",
+    description: "Power through your exercise",
+    coverUrl: "https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(75, 90),
+  },
+  {
+    id: "pl-7",
+    name: "Study Session",
+    description: "Background music for learning",
+    coverUrl: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(90, 105),
+  },
+  {
+    id: "pl-8",
+    name: "Weekend Vibes",
+    description: "Relax and unwind",
+    coverUrl: "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=400&h=400&fit=crop",
+    tracks: sampleTracks.slice(105, 120),
   },
 ];
