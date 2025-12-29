@@ -10,8 +10,9 @@ import { AmbientBackground } from "@/components/player/AmbientBackground";
 import { EqualizerPanel, presets } from "@/components/player/EqualizerPanel";
 import { MiniPlayer } from "@/components/player/MiniPlayer";
 import { CrossfadeControl } from "@/components/player/CrossfadeControl";
+import { MusicUpload } from "@/components/player/MusicUpload";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { sampleTracks, samplePlaylists } from "@/data/sampleTracks";
+import { sampleTracks, samplePlaylists, Track } from "@/data/sampleTracks";
 import { Play, ListMusic, Hand, MousePointer, Search, Heart, List, Disc3, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GestureType } from "@/hooks/useHandTracking";
@@ -28,6 +29,13 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [gestureMode, setGestureMode] = useState<"hand" | "mouse">("mouse");
   const [showGesturePanel, setShowGesturePanel] = useState(true);
+  const [uploadedTracks, setUploadedTracks] = useState<Track[]>([]);
+
+  const allTracks = [...uploadedTracks, ...sampleTracks];
+
+  const handleTrackAdded = (track: Track) => {
+    setUploadedTracks(prev => [track, ...prev]);
+  };
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -60,7 +68,7 @@ const Index = () => {
   }, [player]);
 
   const filteredTracks = searchQuery.trim() 
-    ? sampleTracks.filter(track => 
+    ? allTracks.filter(track => 
         track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         track.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
         track.album.toLowerCase().includes(searchQuery.toLowerCase())
@@ -222,6 +230,37 @@ const Index = () => {
             {currentView === "playlists" && (
               <div className="p-3 sm:p-4 md:p-6 animate-fade-in">
                 <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5">Your Library</h2>
+                
+                {/* Upload Section */}
+                <div className="mb-6">
+                  <MusicUpload onTrackAdded={handleTrackAdded} />
+                </div>
+
+                {/* Uploaded Tracks */}
+                {uploadedTracks.length > 0 && (
+                  <>
+                    <h3 className="text-lg sm:text-xl font-bold mt-6 mb-3">Your Uploads</h3>
+                    <div className="space-y-1 mb-6">
+                      {uploadedTracks.map((track, index) => (
+                        <button
+                          key={track.id}
+                          onClick={() => { player.playTrack(track, allTracks); setCurrentView("playing"); }}
+                          className="track-item w-full flex items-center gap-3 p-2.5 rounded-xl text-left"
+                        >
+                          <span className="w-5 text-center text-xs text-muted-foreground">{index + 1}</span>
+                          <img src={track.coverUrl} alt="" className="w-11 h-11 rounded-lg object-cover" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{track.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
+                          </div>
+                          <span className="text-xs text-primary">Uploaded</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                <h3 className="text-lg sm:text-xl font-bold mb-3">Playlists</h3>
                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
                   {samplePlaylists.map((playlist) => (
                     <button
@@ -255,7 +294,7 @@ const Index = () => {
                   {sampleTracks.slice(0, 20).map((track, index) => (
                     <button
                       key={track.id}
-                      onClick={() => { player.playTrack(track, sampleTracks); setCurrentView("playing"); }}
+                      onClick={() => { player.playTrack(track, allTracks); setCurrentView("playing"); }}
                       className="track-item w-full flex items-center gap-3 p-2.5 rounded-xl text-left"
                     >
                       <span className="w-5 text-center text-xs text-muted-foreground">{index + 1}</span>
@@ -327,10 +366,10 @@ const Index = () => {
                 </div>
                 
                 <div className="space-y-1">
-                  {(searchQuery ? filteredTracks : sampleTracks.slice(0, 30)).map((track, index) => (
+                  {(searchQuery ? filteredTracks : allTracks.slice(0, 30)).map((track, index) => (
                     <button
                       key={track.id}
-                      onClick={() => { player.playTrack(track, sampleTracks); setCurrentView("playing"); }}
+                      onClick={() => { player.playTrack(track, allTracks); setCurrentView("playing"); }}
                       className="track-item w-full flex items-center gap-3 p-2.5 rounded-xl text-left"
                     >
                       <img src={track.coverUrl} alt="" className="w-11 h-11 rounded-lg object-cover" />
