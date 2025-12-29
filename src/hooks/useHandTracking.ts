@@ -12,6 +12,7 @@ export type GestureType =
   | "pinch"
   | "open-palm"
   | "thumbs-up"
+  | "pointing"
   | null;
 
 interface HandPosition {
@@ -197,7 +198,23 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
       }
     }
 
-    // 3. OPEN PALM: All fingers extended
+    // 3. POINTING: Only index finger extended (PLAY gesture)
+    if (!thumbExtended && indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
+      const prevGesture = gestureConfidenceRef.current.get("pointing") || 0;
+      gestureConfidenceRef.current.set("pointing", prevGesture + 1);
+      
+      if (prevGesture >= 4) {
+        setGesture("pointing");
+        onGesture("pointing");
+        lastGestureTimeRef.current = now;
+        gestureConfidenceRef.current.set("pointing", 0);
+        return;
+      }
+    } else {
+      gestureConfidenceRef.current.set("pointing", 0);
+    }
+
+    // 4. OPEN PALM: All fingers extended (PAUSE gesture)
     if (extendedCount >= 4) {
       const prevGesture = gestureConfidenceRef.current.get("open-palm") || 0;
       gestureConfidenceRef.current.set("open-palm", prevGesture + 1);
@@ -213,7 +230,7 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
       gestureConfidenceRef.current.set("open-palm", 0);
     }
 
-    // 4. SWIPE DETECTION with velocity
+    // 5. SWIPE DETECTION with velocity
     if (gestureHistoryRef.current.length >= 10) {
       const history = gestureHistoryRef.current;
       const first = history[0];
@@ -258,7 +275,7 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
       }
     }
 
-    // 5. FIST / TAP: No fingers extended
+    // 6. FIST / TAP: No fingers extended (toggle play/pause)
     if (extendedCount <= 1 && !thumbExtended) {
       const timeSinceLastTap = now - lastTapTimeRef.current;
       

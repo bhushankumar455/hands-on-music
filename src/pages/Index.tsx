@@ -56,13 +56,14 @@ const Index = () => {
 
     switch (gesture) {
       case "tap": player.togglePlay(); break;
+      case "pointing": player.play(); break;
+      case "open-palm": player.pause(); break;
       case "swipe-left": player.previous(); break;
       case "swipe-right": player.next(); break;
       case "swipe-up": player.setVolume(Math.min(1, player.volume + 0.15)); break;
       case "swipe-down": player.setVolume(Math.max(0, player.volume - 0.15)); break;
       case "double-tap": player.toggleLike(); break;
       case "pinch": player.toggleMute(); break;
-      case "open-palm": player.pause(); break;
       case "thumbs-up": if (!player.isLiked) player.toggleLike(); break;
     }
   }, [player]);

@@ -139,6 +139,14 @@ export const HandTracking = forwardRef<HTMLDivElement, HandTrackingProps>(({
         {/* Gesture Guide */}
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
+            <span className="text-primary">☝️</span>
+            <span>Point: Play</span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
+            <span className="text-primary">🖐️</span>
+            <span>Open Palm: Pause</span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
             <span className="text-primary">👋</span>
             <span>Swipe L/R: Skip</span>
           </div>
@@ -147,20 +155,12 @@ export const HandTracking = forwardRef<HTMLDivElement, HandTrackingProps>(({
             <span>Swipe U/D: Volume</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-            {isPlaying ? (
-              <Pause className="h-4 w-4 text-primary" />
-            ) : (
-              <Play className="h-4 w-4 text-primary" />
-            )}
-            <span>Fist: {isPlaying ? "Pause" : "Play"}</span>
-          </div>
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
             <span className="text-primary">🤏</span>
             <span>Pinch: Mute</span>
           </div>
-          <div className="col-span-2 flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
             <Heart className={cn("h-4 w-4", isLiked ? "text-primary fill-primary" : "text-primary")} />
-            <span>Double Fist: Like track</span>
+            <span>Double Fist: Like</span>
           </div>
         </div>
       </div>

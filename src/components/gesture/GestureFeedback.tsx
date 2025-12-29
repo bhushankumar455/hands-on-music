@@ -12,7 +12,8 @@ import {
   ChevronUp,
   ChevronDown,
   Hand,
-  ThumbsUp
+  ThumbsUp,
+  Pointer
 } from "lucide-react";
 
 interface GestureFeedbackProps {
@@ -30,8 +31,9 @@ const gestureIcons: Record<NonNullGesture, React.ReactNode> = {
   "swipe-down": <ChevronDown className="h-12 w-12" />,
   "double-tap": <Heart className="h-12 w-12" />,
   "pinch": <VolumeX className="h-12 w-12" />,
-  "open-palm": <Hand className="h-12 w-12" />,
+  "open-palm": <Pause className="h-12 w-12" />,
   "thumbs-up": <ThumbsUp className="h-12 w-12" />,
+  "pointing": <Play className="h-12 w-12" />,
 };
 
 const gestureLabels: Record<NonNullGesture, string> = {
@@ -42,8 +44,9 @@ const gestureLabels: Record<NonNullGesture, string> = {
   "swipe-down": "Volume Down",
   "double-tap": "Like",
   "pinch": "Mute/Unmute",
-  "open-palm": "Stop",
+  "open-palm": "Pause",
   "thumbs-up": "Great!",
+  "pointing": "Play",
 };
 
 export function GestureFeedback({ gesture, action }: GestureFeedbackProps) {
