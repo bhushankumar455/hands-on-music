@@ -198,8 +198,8 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
       }
     }
 
-    // 3. POINTING: Only index finger extended (PLAY gesture)
-    if (!thumbExtended && indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
+    // 3. TWO FINGERS (Peace sign): Index and middle extended = PLAY
+    if (!thumbExtended && indexExtended && middleExtended && !ringExtended && !pinkyExtended) {
       const prevGesture = gestureConfidenceRef.current.get("pointing") || 0;
       gestureConfidenceRef.current.set("pointing", prevGesture + 1);
       
@@ -214,7 +214,7 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
       gestureConfidenceRef.current.set("pointing", 0);
     }
 
-    // 4. OPEN PALM: All fingers extended (PAUSE gesture)
+    // 4. OPEN PALM: All fingers extended (also PLAY as backup)
     if (extendedCount >= 4) {
       const prevGesture = gestureConfidenceRef.current.get("open-palm") || 0;
       gestureConfidenceRef.current.set("open-palm", prevGesture + 1);

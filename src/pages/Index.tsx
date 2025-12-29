@@ -55,6 +55,7 @@ const Index = () => {
     setTimeout(() => setActiveGesture(null), 800);
 
     switch (gesture) {
+      case "pointing": player.play(); break;
       case "open-palm": player.play(); break;
       case "tap": player.pause(); break;
       case "swipe-left": player.previous(); break;
@@ -63,7 +64,6 @@ const Index = () => {
       case "swipe-down": player.setVolume(Math.max(0, player.volume - 0.15)); break;
       case "double-tap": player.toggleLike(); break;
       case "pinch": player.toggleMute(); break;
-      case "pointing": player.play(); break;
       case "thumbs-up": if (!player.isLiked) player.toggleLike(); break;
     }
   }, [player]);
