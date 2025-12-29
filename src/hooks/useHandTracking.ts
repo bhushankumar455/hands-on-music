@@ -199,11 +199,13 @@ export function useHandTracking(onGesture: (gesture: GestureType) => void): UseH
     }
 
     // 3. TWO FINGERS (Peace sign): Index and middle extended = PLAY
-    if (!thumbExtended && indexExtended && middleExtended && !ringExtended && !pinkyExtended) {
+    // More lenient detection - allow thumb to be in any position
+    if (indexExtended && middleExtended && !ringExtended && !pinkyExtended) {
       const prevGesture = gestureConfidenceRef.current.get("pointing") || 0;
       gestureConfidenceRef.current.set("pointing", prevGesture + 1);
       
-      if (prevGesture >= 4) {
+      // Lower threshold for faster detection
+      if (prevGesture >= 2) {
         setGesture("pointing");
         onGesture("pointing");
         lastGestureTimeRef.current = now;
