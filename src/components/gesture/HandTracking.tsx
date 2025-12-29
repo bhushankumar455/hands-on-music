@@ -139,12 +139,12 @@ export const HandTracking = forwardRef<HTMLDivElement, HandTrackingProps>(({
         {/* Gesture Guide */}
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-            <span className="text-primary">☝️</span>
-            <span>Point: Play</span>
+            <span className="text-primary">🖐️</span>
+            <span>Open Palm: Play</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-            <span className="text-primary">🖐️</span>
-            <span>Open Palm: Pause</span>
+            <span className="text-primary">✊</span>
+            <span>Closed Fist: Pause</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
             <span className="text-primary">👋</span>

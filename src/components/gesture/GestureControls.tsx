@@ -119,23 +119,7 @@ export function GestureControls({
 
         {/* Center area - Play and Pause buttons */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-4">
-          {/* Play button */}
-          <button
-            onClick={(e) => handleGesture("pointing", e)}
-            className={cn(
-              "w-20 h-20 rounded-full",
-              "bg-primary/10 hover:bg-primary/20",
-              "border-2 border-primary/30 hover:border-primary/50",
-              "flex flex-col items-center justify-center gap-1",
-              "transition-all duration-200",
-              activeGesture === "pointing" && "scale-90 bg-primary/30 gesture-glow"
-            )}
-          >
-            <Play className="h-8 w-8 text-primary ml-1" />
-            <span className="text-[10px] text-muted-foreground">Play</span>
-          </button>
-
-          {/* Pause button */}
+          {/* Play button - Open Palm */}
           <button
             onClick={(e) => handleGesture("open-palm", e)}
             className={cn(
@@ -145,6 +129,22 @@ export function GestureControls({
               "flex flex-col items-center justify-center gap-1",
               "transition-all duration-200",
               activeGesture === "open-palm" && "scale-90 bg-primary/30 gesture-glow"
+            )}
+          >
+            <Play className="h-8 w-8 text-primary ml-1" />
+            <span className="text-[10px] text-muted-foreground">Play</span>
+          </button>
+
+          {/* Pause button - Closed Fist */}
+          <button
+            onClick={(e) => handleGesture("tap", e)}
+            className={cn(
+              "w-20 h-20 rounded-full",
+              "bg-primary/10 hover:bg-primary/20",
+              "border-2 border-primary/30 hover:border-primary/50",
+              "flex flex-col items-center justify-center gap-1",
+              "transition-all duration-200",
+              activeGesture === "tap" && "scale-90 bg-primary/30 gesture-glow"
             )}
           >
             <Pause className="h-8 w-8 text-primary" />
