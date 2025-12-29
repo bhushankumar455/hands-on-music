@@ -198,7 +198,7 @@ const albumNames = [
 
 // Audio URLs from SoundHelix (royalty-free)
 const audioUrls = [
-  "https://open.spotify.com/track/5xKr4HfdnYLMDmAJZkOuBc",
+  "https://soundworldz.com/track/dhurandhar-title-track",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
