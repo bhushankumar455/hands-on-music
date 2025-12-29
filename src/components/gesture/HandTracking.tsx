@@ -1,7 +1,7 @@
-import { useRef, useEffect } from "react";
+import { forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useHandTracking, GestureType } from "@/hooks/useHandTracking";
-import { Camera, CameraOff, Loader2, Hand, AlertCircle } from "lucide-react";
+import { Camera, CameraOff, Loader2, Hand, AlertCircle, Play, Pause, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HandTrackingProps {
@@ -11,12 +11,12 @@ interface HandTrackingProps {
   isMuted: boolean;
 }
 
-export function HandTracking({ 
+export const HandTracking = forwardRef<HTMLDivElement, HandTrackingProps>(({ 
   onGesture, 
   isPlaying, 
   isLiked, 
   isMuted 
-}: HandTrackingProps) {
+}, ref) => {
   const {
     videoRef,
     canvasRef,
@@ -147,19 +147,25 @@ export function HandTracking({
             <span>Swipe U/D: Volume</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-            <span className="text-primary">✊</span>
-            <span>Fist: Play/Pause</span>
+            {isPlaying ? (
+              <Pause className="h-4 w-4 text-primary" />
+            ) : (
+              <Play className="h-4 w-4 text-primary" />
+            )}
+            <span>Fist: {isPlaying ? "Pause" : "Play"}</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
             <span className="text-primary">🤏</span>
             <span>Pinch: Mute</span>
           </div>
           <div className="col-span-2 flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-            <span className="text-primary">✊✊</span>
+            <Heart className={cn("h-4 w-4", isLiked ? "text-primary fill-primary" : "text-primary")} />
             <span>Double Fist: Like track</span>
           </div>
         </div>
       </div>
     </div>
   );
-}
+});
+
+HandTracking.displayName = "HandTracking";

@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { 
-  Hand, 
   ChevronLeft, 
   ChevronRight, 
   ChevronUp, 
@@ -126,16 +125,17 @@ export function GestureControls({
             "w-28 h-28 rounded-full",
             "bg-primary/10 hover:bg-primary/20",
             "border-2 border-primary/30 hover:border-primary/50",
-            "flex flex-col items-center justify-center gap-1",
+            "flex flex-col items-center justify-center gap-2",
             "transition-all duration-200",
             activeGesture === "tap" && "scale-90 bg-primary/30 gesture-glow"
           )}
         >
-          <Hand className="h-8 w-8 text-primary" />
-          <span className="text-xs text-primary font-medium">
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </span>
-          <span className="text-xs text-muted-foreground">Tap</span>
+          {isPlaying ? (
+            <Pause className="h-10 w-10 text-primary" />
+          ) : (
+            <Play className="h-10 w-10 text-primary ml-1" />
+          )}
+          <span className="text-xs text-muted-foreground">Tap to {isPlaying ? "Pause" : "Play"}</span>
         </button>
 
         {/* Directional gesture buttons */}
@@ -216,8 +216,8 @@ export function GestureControls({
           <span>Volume Down</span>
         </div>
         <div className="flex items-center gap-2">
-          <Hand className="h-4 w-4" />
-          <span>Play/Pause</span>
+          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          <span>{isPlaying ? "Pause" : "Play"}</span>
         </div>
         <div className="flex items-center gap-2">
           <Heart className="h-4 w-4" />
